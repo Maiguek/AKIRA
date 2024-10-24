@@ -11,7 +11,7 @@ Eyebrow_R,90,84,140
 Eyelid_Right_Upper,80,40,110
 Forhead_R,90,70,115
 Forhead_L,100,80,120
-Eyebrow_L,90,0,180
+Eyebrow_L,90,70,115
 Eyelid_Left_Down,90,60,100
 Eyelid_Left_Up,90,80,135
 Rothead,90,30,150
@@ -20,5 +20,5 @@ rotate,90,40,180
 shoulder,130,0,180
 omoplate,70,10,70
 Neck,60,0,100
-Jaw,90,0,180
+Jaw,100,100,150
 Rollneck,40,0,60

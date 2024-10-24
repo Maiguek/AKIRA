@@ -65,7 +65,7 @@ void setup() {
   omoplate.write(70);
 
   Neck.write(60);
-  Jaw.write(90);
+  Jaw.write(100);
   RollNeck.write(40);
 
   pwm.setPWM(Eye_Left_LR, 0, angleToPulse(90));
