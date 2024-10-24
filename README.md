@@ -2,7 +2,7 @@
 
 _A Humanoid Social Robot inspired by Hiroshi Ishiguro’s Symbiotic Human-Robot Interaction Project_
 
-![Akira Winking](.media/IMG_4697.png)
+![Akira Winking](./media/IMG_4697.png)
 
 ## Table of Contents
 - [Project Overview](#project-overview)
@@ -29,13 +29,13 @@ This project aims to create a robot capable of engaging in natural, expressive c
 
 ## Current development status
 
-![Full Torso Front](.media/IMG_4715.png)
+![Full Torso Front](./media/IMG_4715.png)
 
 ### Hardware and Physical Robot Construction
 
 For 3D printing I have been using an Ender 3 V2, which has required some customary fixings, but makes the job. I have been printing with PLA.
 
-![Akira's back](.media/IMG_4716.png)
+![Akira's back](./media/IMG_4716.png)
 
 External hardware components needed for Akira:
 
@@ -59,14 +59,14 @@ At this moment Akira has **successfully assemembled** his:
 - Back
 - Power Distribution
 
-![Power Distribution](.media/IMG_4717.png)
+![Power Distribution](./media/IMG_4717.png)
 
 Out of these, the next are **totally functional** (I can control successfully all servomotors):
 - Face
 - Neck
 - Left Shoulder
 
-![Face Servo Hub](.media/IMG_4718.png)
+![Face Servo Hub](./media/IMG_4718.png)
 
 Missing parts to be **assembled**:
 - Biceps
@@ -85,11 +85,11 @@ Missing parts **to be printed**:
 - Chest
 - Legs
 
-![Akira Face](.media/IMG_4719.png)
+![Akira Face](./media/IMG_4719.png)
 
 Other hardware such as microphones and speakers are yet to be assembled.
 
-![Close Up Akira](.media/IMG_4720.png)
+![Close Up Akira](./media/IMG_4720.png)
 
 ### Software and Conversational models
 
