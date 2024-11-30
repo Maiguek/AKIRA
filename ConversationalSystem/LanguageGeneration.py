@@ -19,7 +19,8 @@ class AkiraChatbot:
 
         try:
             result = subprocess.run(command, capture_output=True, text=True, check=True).stdout
-            akiras_response = re.findall(r"Akira:\n*<ioc>(.*?)<eoc>", result, re.DOTALL)[0]
+            result = result[len(prompt):]
+            akiras_response = re.findall(r"Akira: <ioc>(.*?)<eoc>", result, re.DOTALL)[0]
 
             observer_match = re.search(r"PyTorchObserver\s*({.*?})", result)
             if observer_match:
@@ -52,9 +53,8 @@ if __name__ == "__main__":
     Miguel: <ioc>"My name is Miguel."<eoc>
     Akira: <ioc>"My name is Akira. I am pleased to meet you, Miguel!"<eoc>
     Miguel: <ioc>"Hi Akira! It is my pleasure to meet you."<eoc>
-    Akira:
     """
-    seq_len = len(prompt.replace("\n", " ").replace('"', '').split()) + 100 # I have to check really which values for the seq_len are appropriate
+    seq_len = len(prompt.replace("\n", " ").replace('"', '').split()) + 200 # I have to check really which values for the seq_len are appropriate
     executable_path = "../LlamaModels/executorch/cmake-out/examples/models/llama/llama_main"
 
     akira_chatbot = AkiraChatbot(model_path, tokenizer_path, executable_path)

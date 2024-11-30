@@ -1,101 +1,175 @@
-import pandas as pd
-from LanguageGeneration import AkiraChatbot
-from SpeechRecognition import Listening
+import cv2
+import tkinter as tk
+from tkinter import Text, Scrollbar, messagebox
+from PIL import Image, ImageTk
+import mediapipe as mp
+from VisualAnalyzer import CameraAnalyzer
+from ConversationalSystem import ConversationalSystem
 
-# Define important paths and initialize modulos
+# Define important paths and initialize modules
 user_info_path = "userInfo.csv"
 conversation_history_path = "ConversationHistory.txt"
 
-Listener = Listening()
-
-model_path = "/home/maiguek/Documents/LlamaModels/DownloadedWeights/Llama3.2-3B-Instruct-int4-qlora-eo8/llama3_2.pte"
-tokenizer_path = "/home/maiguek/Documents/LlamaModels/DownloadedWeights/Llama3.2-3B-Instruct-int4-qlora-eo8/tokenizer.model"
-executable_path = "../LlamaModels/executorch/cmake-out/examples/models/llama/llama_main"
-ChatBot = AkiraChatbot(model_path, tokenizer_path, executable_path)
-
-# Some helper functions for functionality
-def read_user_info(path=user_info_path):
-    return pd.read_csv(path)
-
-def generate_prompt(user_info, conversation_history):
-    name, age, emotion, ocuppation, likes, dislikes = user_info
-
-    prompt = "You are Akira, a humanoid robot designed for joyful and meaningful interactions. You are friendly, curious, and love to ask questions to learn more about the people you talk to."
-    prompt += f"\nThe person in front of you is {age} years old, likes {likes}, dislikes {dislikes}, and is {ocuppation}. {name} feels {emotion}"
-    prompt += "\n\nConversation:"
-    prompt += conversation_history
-    prompt += "\nAkira:"
-
-    return prompt
-
-def read_conversation_history(path=conversation_history_path):
-    with open(path, "r") as file:
-        lines = file.readlines()
-
-    return lines
-
-def get_seq_len(prompt, extra_tokens=100):
-    # This is very important as it needs to be large enough so Akira can write completely his sentence, but small enough so the computer can resist the prompt.
-    return len(prompt.replace("\n", " ").replace('"', '').split()) + extra_tokens
-
-def get_last_k_records(path=conversation_history_path, k=3):
-    lines = read_conversation_history(path)
-    return lines[:-k]
-
-def update_conversation(new_message, path=conversation_history_path):
-    with open(path, "wb") as file:
-        file.write(new_message)
-
-
-# Main part Conversational System
-while True:
-    user_info = read_user_info()
-    
-    # TODO: Make subtle movements (waiting/listening) ALSO: on the background, trying to make eye contact, but taking care of the gaze
-
-    User_Speech = Listener.hear()
-
-    if User_Speech:
-        if user_info["Name"] is None:
-            name = "User"
-        else:
-            name = user_info["Name"]
-
-        # This is the message from the user to Akira
-        User_Speech = "name: " + User_Speech
-
-        # We update the current conversation with the user's message
-        update_conversation(User_Speech)
-
-        # We could either read all the conversation so far or extract just the last k messages between Akira and the User
-        # conversation_history = read_conversation_history().strip()
-        last_k_records = get_last_k_records().strip()
-
-        # We prepare our prompt to generate the message from Akira
-        prompt = generate_prompt(user_info, last_k_records)
-        seq_len = get_seq_len(prompt)
-
-        Akira_text_answer = AkiraChatbot.generate_response(prompt, seq_len)
-
-        # We update the conversation history
-        update_conversation(Akira_text_answer)
-
-        # TODO:  Add a feature to the LanguageGeneration for analyzing the ConversationHistory and Determining likes, dislikes, ocuppation, and age to update the user information.
-
-        # TODO:  Produce Akira's voice text_answer
-        #   while doing so move jaw
+class AkiraInterface:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Akira Interaction Interface")
+        self.root.geometry("1600x1000")
         
-        # TODO:  Produce Gesture movements
+        # Video Capture for both eyes
+        self.cap_left = cv2.VideoCapture(0)  # Left eye
+        self.cap_right = cv2.VideoCapture(2)  # Right eye
 
-        # TODO:  Analyze user's face and emotion
+        # Layout for Eye Camera Display
+        self.eye_label = tk.Label(self.root, borderwidth=2, relief="solid")
+        self.eye_label.place(x=10, y=10, width=640, height=480)
 
-        # TODO:  Reproduce Akira's current facial emotion
+        # Button to Switch Cameras
+        self.switch_button = tk.Button(self.root, text="Switch Camera", command=self.switch_camera)
+        self.switch_button.place(x=10, y=500, width=150, height=40)
 
+        # Conversation History
+        self.conversation_history = Text(self.root, wrap="word", borderwidth=2, relief="solid")
+        self.conversation_history.place(x=670, y=10, width=900, height=480)
+        
+        # Scrollbar for Conversation History
+        self.scrollbar = Scrollbar(self.conversation_history)
+        self.scrollbar.pack(side="right", fill="y")
+        self.conversation_history.config(yscrollcommand=self.scrollbar.set)
+        
+        # User Information Section
+        self.user_info_frame = tk.Frame(self.root, borderwidth=2, relief="solid", bg="yellow")
+        self.user_info_frame.place(x=10, y=550, width=780, height=200)
+        self.user_info_label = tk.Label(self.user_info_frame, text="Information of the user:")
+        self.user_info_label.pack(anchor="w", padx=10, pady=10)
+        
+        # System Information Section
+        self.system_info_frame = tk.Frame(self.root, borderwidth=2, relief="solid", bg="purple")
+        self.system_info_frame.place(x=800, y=550, width=780, height=200)
+        self.system_info_label = tk.Label(self.system_info_frame, text="Information on the system:\nCurrently talking: \nTotal time of conversation:")
+        self.system_info_label.pack(anchor="w", padx=10, pady=10)
+        
+        # Start and Stop buttons
+        self.start_button = tk.Button(self.root, text="Start", command=self.start_conversation, fg="red")
+        self.start_button.place(x=10, y=800, width=150, height=50)
+        
+        self.stop_button = tk.Button(self.root, text="Stop", command=self.stop_conversation, fg="red")
+        self.stop_button.place(x=180, y=800, width=150, height=50)
+        
+        # To control the state of updating frames
+        self.running = True
+        self.current_camera = 'left'
+        
+        # Initialize MediaPipe Face Detection
+        self.mp_face_detection = mp.solutions.face_detection
+        self.mp_drawing = mp.solutions.drawing_utils
+        self.face_detection = self.mp_face_detection.FaceDetection(model_selection=0, min_detection_confidence=0.5)
+        
+        # Initialize Camera Analyzer
+        self.camera_analyzer = CameraAnalyzer()
+        self.last_analysis_result = "No analysis yet"
+        
+        # Initialize Conversational System
+        model_path = "/home/maiguek/Documents/LlamaModels/DownloadedWeights/Llama3.2-3B-Instruct-int4-qlora-eo8/llama3_2.pte"
+        tokenizer_path = "/home/maiguek/Documents/LlamaModels/DownloadedWeights/Llama3.2-3B-Instruct-int4-qlora-eo8/tokenizer.model"
+        executable_path = "../LlamaModels/executorch/cmake-out/examples/models/llama/llama_main"
+        self.conversational_system = ConversationalSystem(user_info_path, conversation_history_path, model_path, tokenizer_path, executable_path)
+        
+        # Start updating frames
+        self.update_frames()
+        self.root.after(3000, self.update_analysis)  # Schedule analysis every 3 seconds
 
+    def start_conversation(self):
+        messagebox.showinfo("Info", "Conversation Started")
+        self.running = True
+        self.update_conversation()
 
-
-
-
-
-
+    def stop_conversation(self):
+        messagebox.showinfo("Info", "Conversation Stopped")
+        self.running = False
     
+    def switch_camera(self):
+        # Switch between left and right camera
+        if self.current_camera == 'left':
+            self.current_camera = 'right'
+            self.camera_analyzer.update_camera_index(2)
+        else:
+            self.current_camera = 'left'
+            self.camera_analyzer.update_camera_index(0)
+        
+        # Release and reinitialize the camera to prevent freezing
+        if self.current_camera == 'left':
+            self.cap_right.release()
+            self.cap_left = cv2.VideoCapture(0, cv2.CAP_V4L2)
+        else:
+            self.cap_left.release()
+            self.cap_right = cv2.VideoCapture(2, cv2.CAP_V4L2)
+
+    def update_frames(self):
+        if not self.running:
+            return
+
+        if self.current_camera == 'left':
+            ret, frame = self.cap_left.read()
+        else:
+            ret, frame = self.cap_right.read()
+
+        if ret:
+            # Convert the frame to RGB
+            frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            
+            # Detect faces using MediaPipe
+            results = self.face_detection.process(frame_rgb)
+            
+            # Draw face detection annotations on the frame
+            if results.detections:
+                for detection in results.detections:
+                    self.mp_drawing.draw_detection(frame_rgb, detection)
+            
+            # Convert frame to ImageTk format
+            img = ImageTk.PhotoImage(Image.fromarray(frame_rgb))
+            self.eye_label.config(image=img)
+            self.eye_label.image = img
+
+        # Call update_frames again after 30 ms
+        self.root.after(30, self.update_frames)
+
+    def update_analysis(self):
+        # Perform analysis every 3 seconds
+        analysis_result = self.camera_analyzer.get_analysis_string()
+        if analysis_result != "No face detected":
+            self.last_analysis_result = analysis_result
+        
+        # Update user information label
+        self.user_info_label.config(text=f"Information of the user:\n{self.last_analysis_result}")
+        
+        # Schedule the next analysis
+        self.root.after(3000, self.update_analysis)
+
+    def update_conversation(self):
+        if not self.running:
+            return
+
+        user_speech, akira_response = self.conversational_system.listen_and_respond()
+
+        if user_speech and akira_response:
+            # Update conversation history in the GUI
+            self.conversation_history.insert(tk.END, f"{user_speech}\nAkira: {akira_response}\n")
+            self.conversation_history.see(tk.END)
+
+        # Schedule the next conversation update
+        self.root.after(3000, self.update_conversation)
+
+    def on_close(self):
+        self.running = False
+        self.cap_left.release()
+        self.cap_right.release()
+        self.camera_analyzer.release_camera()
+        self.root.destroy()
+
+# Main loop
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = AkiraInterface(root)
+    root.protocol("WM_DELETE_WINDOW", app.on_close)
+    root.mainloop()
