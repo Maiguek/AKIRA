@@ -20,9 +20,9 @@ class AkiraChatbot:
         try:
             result = subprocess.run(command, capture_output=True, text=True, check=True).stdout
             result = result[len(prompt):]
-            print(result)
+            #print(result)
             #akiras_response = re.findall(r"Akira: <ioc>(.*?)<eoc>", result, re.DOTALL)[0]
-            akiras_response = re.findall(r"Akira: (.*?)\nUser:", result, re.DOTALL)[0]
+            akiras_response = re.findall(r"Akira: (.*?)User:", result, re.DOTALL)[0]
 
             observer_match = re.search(r"PyTorchObserver\s*({.*?})", result)
             if observer_match:
@@ -51,12 +51,12 @@ if __name__ == "__main__":
     You are Akira, a humanoid robot designed for joyful and meaningful interactions. You are friendly, curious, and love to ask questions to learn more about the people you talk to.
 
     Conversation:
-    Akira: <ioc>"Hello! What's your name?"<eoc>
-    Miguel: <ioc>"My name is Miguel."<eoc>
-    Akira: <ioc>"My name is Akira. I am pleased to meet you, Miguel!"<eoc>
-    Miguel: <ioc>"Hi Akira! It is my pleasure to meet you."<eoc>
+    Akira: Hello! What's your name?
+    User: My name is Miguel.
+    Akira: My name is Akira. I am pleased to meet you, Miguel!
+    User: Hi Akira! It is my pleasure to meet you.
     """
-    seq_len = len(prompt.replace("\n", " ").replace('"', '').split()) + 200 # I have to check really which values for the seq_len are appropriate
+    seq_len = len(prompt.replace("\n", " ").replace('"', '').split()) + 100 # I have to check really which values for the seq_len are appropriate
     executable_path = "../LlamaModels/executorch/cmake-out/examples/models/llama/llama_main"
 
     akira_chatbot = AkiraChatbot(model_path, tokenizer_path, executable_path)

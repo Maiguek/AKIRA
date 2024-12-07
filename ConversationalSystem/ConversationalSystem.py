@@ -13,6 +13,11 @@ class ConversationalSystem:
         self.talker = AkiraTalk()
         self.chatbot = AkiraChatbot(model_path, tokenizer_path, executable_path)
 
+        if not user_info_path.endswith(".csv"):
+            raise ValueError("user_info_path should be a .csv file")
+        if not conversation_history_path.endswith(".txt"):
+            raise ValueError("conversation_history_path should be a .txt file")
+
         base_dir = os.getcwd() + "/ConversationalSystem/data/"
         self.user_info_path = os.path.join(base_dir, user_info_path)
         self.conversation_history_path = os.path.join(base_dir, conversation_history_path)
@@ -116,12 +121,10 @@ class ConversationalSystem:
             seq_len = self.get_seq_len(prompt)
             print("Prompt:", prompt)
 
-            try:
-                print("Generating response...")
-                akira_response, observer_data = self.chatbot.generate_response(prompt, seq_len)
-            except Exception as e:
-                print(f"Error generating response: {e}")
-                akira_response, observer_data = None, None
+            
+            print("Generating response...")
+            akira_response, observer_data = self.chatbot.generate_response(prompt, seq_len)
+            
 
             if akira_response:
                 self.update_conversation(f"Akira: {akira_response}")
