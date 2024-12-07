@@ -16,21 +16,20 @@ class AkiraInterface:
         self.root.title("Akira Interaction Interface")
         self.root.geometry("1600x1000")
         
-        # Video Capture for both eyes
-        self.cap_left = cv2.VideoCapture(0)  # Left eye
-        self.cap_right = cv2.VideoCapture(2)  # Right eye
+        # Video Capture for both left cameras
+        self.eye_left = cv2.VideoCapture(2)  # Left camera 
+        self.eye_right = cv2.VideoCapture(0)  # Right camera
 
         # Layout for Eye Camera Display
-        self.eye_label = tk.Label(self.root, borderwidth=2, relief="solid")
-        self.eye_label.place(x=10, y=10, width=640, height=480)
+        self.eye_label_1 = tk.Label(self.root, borderwidth=2, relief="solid")
+        self.eye_label_1.place(x=10, y=10, width=640, height=480)
 
-        # Button to Switch Cameras
-        self.switch_button = tk.Button(self.root, text="Switch Camera", command=self.switch_camera)
-        self.switch_button.place(x=10, y=500, width=150, height=40)
+        self.eye_label_2 = tk.Label(self.root, borderwidth=2, relief="solid")
+        self.eye_label_2.place(x=660, y=10, width=640, height=480)
 
         # Conversation History
         self.conversation_history = Text(self.root, wrap="word", borderwidth=2, relief="solid")
-        self.conversation_history.place(x=670, y=10, width=900, height=480)
+        self.conversation_history.place(x=1320, y=10, width=260, height=480)
         
         # Scrollbar for Conversation History
         self.scrollbar = Scrollbar(self.conversation_history)
@@ -39,13 +38,13 @@ class AkiraInterface:
         
         # User Information Section
         self.user_info_frame = tk.Frame(self.root, borderwidth=2, relief="solid", bg="yellow")
-        self.user_info_frame.place(x=10, y=550, width=780, height=200)
+        self.user_info_frame.place(x=10, y=500, width=780, height=200)
         self.user_info_label = tk.Label(self.user_info_frame, text="Information of the user:")
         self.user_info_label.pack(anchor="w", padx=10, pady=10)
         
         # System Information Section
         self.system_info_frame = tk.Frame(self.root, borderwidth=2, relief="solid", bg="purple")
-        self.system_info_frame.place(x=800, y=550, width=780, height=200)
+        self.system_info_frame.place(x=800, y=500, width=780, height=200)
         self.system_info_label = tk.Label(self.system_info_frame, text="Information on the system:\nCurrently talking: \nTotal time of conversation:")
         self.system_info_label.pack(anchor="w", padx=10, pady=10)
         
@@ -58,12 +57,13 @@ class AkiraInterface:
         
         # To control the state of updating frames
         self.running = True
-        self.current_camera = 'left'
         
-        # Initialize MediaPipe Face Detection
-        self.mp_face_detection = mp.solutions.face_detection
+        # Initialize MediaPipe Face Mesh and Pose Detection
+        self.mp_face_mesh = mp.solutions.face_mesh
+        self.mp_pose = mp.solutions.pose
         self.mp_drawing = mp.solutions.drawing_utils
-        self.face_detection = self.mp_face_detection.FaceDetection(model_selection=0, min_detection_confidence=0.5)
+        self.face_mesh = self.mp_face_mesh.FaceMesh(static_image_mode=False, max_num_faces=1, min_detection_confidence=0.5)
+        self.pose = self.mp_pose.Pose(static_image_mode=False, model_complexity=1, min_detection_confidence=0.5)
         
         # Initialize Camera Analyzer
         self.camera_analyzer = CameraAnalyzer()
@@ -73,7 +73,7 @@ class AkiraInterface:
         model_path = "/home/maiguek/Documents/LlamaModels/DownloadedWeights/Llama3.2-3B-Instruct-int4-qlora-eo8/llama3_2.pte"
         tokenizer_path = "/home/maiguek/Documents/LlamaModels/DownloadedWeights/Llama3.2-3B-Instruct-int4-qlora-eo8/tokenizer.model"
         executable_path = "../LlamaModels/executorch/cmake-out/examples/models/llama/llama_main"
-        self.conversational_system = ConversationalSystem(user_info_path, conversation_history_path, model_path, tokenizer_path, executable_path)
+        self.conversational_system = ConversationalSystem(model_path, tokenizer_path, executable_path)
         
         # Start updating frames
         self.update_frames()
@@ -88,48 +88,46 @@ class AkiraInterface:
         messagebox.showinfo("Info", "Conversation Stopped")
         self.running = False
     
-    def switch_camera(self):
-        # Switch between left and right camera
-        if self.current_camera == 'left':
-            self.current_camera = 'right'
-            self.camera_analyzer.update_camera_index(2)
-        else:
-            self.current_camera = 'left'
-            self.camera_analyzer.update_camera_index(0)
-        
-        # Release and reinitialize the camera to prevent freezing
-        if self.current_camera == 'left':
-            self.cap_right.release()
-            self.cap_left = cv2.VideoCapture(0, cv2.CAP_V4L2)
-        else:
-            self.cap_left.release()
-            self.cap_right = cv2.VideoCapture(2, cv2.CAP_V4L2)
-
     def update_frames(self):
         if not self.running:
             return
 
-        if self.current_camera == 'left':
-            ret, frame = self.cap_left.read()
-        else:
-            ret, frame = self.cap_right.read()
+        # Read frames from both left cameras
+        ret1, frame1 = self.eye_left.read()
+        ret2, frame2 = self.eye_right.read()
 
-        if ret:
+        if ret1:
             # Convert the frame to RGB
-            frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            frame_rgb_1 = cv2.cvtColor(frame1, cv2.COLOR_BGR2RGB)
             
-            # Detect faces using MediaPipe
-            results = self.face_detection.process(frame_rgb)
+            # Detect face mesh using MediaPipe
+            results_1 = self.face_mesh.process(frame_rgb_1)
             
-            # Draw face detection annotations on the frame
-            if results.detections:
-                for detection in results.detections:
-                    self.mp_drawing.draw_detection(frame_rgb, detection)
+            # Draw face mesh annotations on the frame
+            if results_1.multi_face_landmarks:
+                for face_landmarks in results_1.multi_face_landmarks:
+                    self.mp_drawing.draw_landmarks(frame_rgb_1, face_landmarks, self.mp_face_mesh.FACEMESH_TESSELATION)
             
             # Convert frame to ImageTk format
-            img = ImageTk.PhotoImage(Image.fromarray(frame_rgb))
-            self.eye_label.config(image=img)
-            self.eye_label.image = img
+            img_1 = ImageTk.PhotoImage(Image.fromarray(frame_rgb_1))
+            self.eye_label_1.config(image=img_1)
+            self.eye_label_1.image = img_1
+
+        if ret2:
+            # Convert the frame to RGB
+            frame_rgb_2 = cv2.cvtColor(frame2, cv2.COLOR_BGR2RGB)
+            
+            # Detect body pose using MediaPipe
+            results_2 = self.pose.process(frame_rgb_2)
+            
+            # Draw pose annotations on the frame
+            if results_2.pose_landmarks:
+                self.mp_drawing.draw_landmarks(frame_rgb_2, results_2.pose_landmarks, self.mp_pose.POSE_CONNECTIONS)
+            
+            # Convert frame to ImageTk format
+            img_2 = ImageTk.PhotoImage(Image.fromarray(frame_rgb_2))
+            self.eye_label_2.config(image=img_2)
+            self.eye_label_2.image = img_2
 
         # Call update_frames again after 30 ms
         self.root.after(30, self.update_frames)
@@ -148,22 +146,26 @@ class AkiraInterface:
 
     def update_conversation(self):
         if not self.running:
+            self.system_info_label.config(text="Information on the system:\nCurrently talking: No one is speaking\nTotal time of conversation:")
             return
 
+        self.system_info_label.config(text="Information on the system:\nCurrently talking: User is speaking\nTotal time of conversation:")
         user_speech, akira_response = self.conversational_system.listen_and_respond()
 
         if user_speech and akira_response:
             # Update conversation history in the GUI
             self.conversation_history.insert(tk.END, f"{user_speech}\nAkira: {akira_response}\n")
             self.conversation_history.see(tk.END)
+            self.system_info_label.config(text="Information on the system:\nCurrently talking: Akira is speaking\nTotal time of conversation:")
+            self.conversational_system.talk(akira_response)
 
         # Schedule the next conversation update
         self.root.after(3000, self.update_conversation)
 
     def on_close(self):
         self.running = False
-        self.cap_left.release()
-        self.cap_right.release()
+        self.eye_left.release()
+        self.eye_right.release()
         self.camera_analyzer.release_camera()
         self.root.destroy()
 

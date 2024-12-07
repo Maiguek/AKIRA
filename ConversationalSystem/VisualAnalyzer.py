@@ -1,7 +1,7 @@
 import cv2
 from deepface import DeepFace
 
-# TODO: Find models that can be used with Coral TPU (tensorflow lite) and update the CameraAnalyzer class
+# For the moment I will be using DeepFace, but I want to use MediaPipe and train it for emotion recognition and face detection
 
 class CameraAnalyzer:
     def __init__(self, camera_index=0):

@@ -15,3 +15,9 @@ class Listening():
                 return None # speech was not recognized
             
 
+if __name__ == "__main__":
+    print("Listening...")
+    listener = Listening()
+    print(listener.hear())
+            
+

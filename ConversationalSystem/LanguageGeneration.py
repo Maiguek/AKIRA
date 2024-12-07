@@ -10,7 +10,7 @@ class AkiraChatbot:
 
     def generate_response(self, prompt, seq_len):
         command = [
-            executable_path,
+            self.executable_path,
             f"--model_path={self.model_path}",
             f"--tokenizer_path={self.tokenizer_path}",
             f"--prompt={prompt}",
@@ -20,7 +20,9 @@ class AkiraChatbot:
         try:
             result = subprocess.run(command, capture_output=True, text=True, check=True).stdout
             result = result[len(prompt):]
-            akiras_response = re.findall(r"Akira: <ioc>(.*?)<eoc>", result, re.DOTALL)[0]
+            print(result)
+            #akiras_response = re.findall(r"Akira: <ioc>(.*?)<eoc>", result, re.DOTALL)[0]
+            akiras_response = re.findall(r"Akira: (.*?)\nUser:", result, re.DOTALL)[0]
 
             observer_match = re.search(r"PyTorchObserver\s*({.*?})", result)
             if observer_match:
