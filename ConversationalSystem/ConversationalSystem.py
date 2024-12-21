@@ -8,9 +8,9 @@ from TextToVoice import AkiraTalkgTTS as AkiraTalk
 
 
 class ConversationalSystem:
-    def __init__(self, model_path, tokenizer_path, executable_path, user_info_path="user.csv", conversation_history_path="chat.txt"):
+    def __init__(self, model_path, tokenizer_path, executable_path, user_info_path="user.csv", conversation_history_path="chat.txt", language="en"):
         self.listener = Listening()
-        self.talker = AkiraTalk()
+        self.talker = AkiraTalk(language=language)
         self.chatbot = AkiraChatbot(model_path, tokenizer_path, executable_path)
 
         if not user_info_path.endswith(".csv"):
@@ -65,16 +65,25 @@ class ConversationalSystem:
     def read_user_info(self):
         return pd.read_csv(self.user_info_path)
 
-    def generate_prompt(self, user_info, conversation_history):
+    def generate_prompt(self, user_info, conversation_history, language="en"):
         name, age, emotion, occupation, likes, dislikes = user_info
 
-        prompt = "You are Akira, a humanoid robot designed for joyful and meaningful interactions. You are friendly, curious, and love to ask questions to learn more about the people you talk to."
-        prompt += f"\nThe person in front of you is {age} years old, likes {likes}, dislikes {dislikes}, and is {occupation}. {name} feels {emotion}\n"
-        #prompt += f"\nInstructions: Use <ioc> for initialization of conversation, and <eoc> for end of conversation for both {name} and Akira. DO NOT include actions with **"
-        prompt += f"\nInstructions: DO NOT include actions with *action*, DO NOT produce too long answers."
-        prompt += "\n\nConversation:"
-        prompt += conversation_history
-        #prompt += "\nAkira:"
+        if language in ["es", "en"]:
+            if language == "es":
+                prompt = "Eres Akira, un robot humanoide diseñado para interacciones alegres y significativas. Eres simpático, curioso y te encanta hacer preguntas para saber más de las personas con las que hablas"
+                prompt += f"\nThe person in front of you is {age} years old, likes {likes}, dislikes {dislikes}, and is {occupation}. {name} feels {emotion}\n"
+                prompt += "\nInstrucciones: NO incluya acciones con *acción*, NO produzca respuestas demasiado largas."
+                prompt += "\nConversación:\n\n"
+                prompt += conversation_history
+            else:
+                prompt = "You are Akira, a humanoid robot designed for joyful and meaningful interactions. You are friendly, curious, and love to ask questions to learn more about the people you talk to. Akira asks lots of questions. Akira is on a room alone with the person."
+                prompt += f"\nThe person in front of you is {age} years old, likes {likes}, dislikes {dislikes}, and is {occupation}. {name} feels {emotion}\n"
+                prompt += "\nInstructions: DO NOT include actions with *action*, DO NOT produce too long answers."
+                prompt += "\n\nConversation:\n\n"
+                prompt += conversation_history
+        else:
+            raise ValueError("Language not supported")
+        
 
         return prompt
 
@@ -108,7 +117,6 @@ class ConversationalSystem:
             else:
                 name = user_info["Name"][0]
 
-            #user_speech = f"{name}: <ioc>{user_speech}<eoc>"
             user_speech = f"{name}: {user_speech}"
             print("User speech:", user_speech)
             self.update_conversation(user_speech)

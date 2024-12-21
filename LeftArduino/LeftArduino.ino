@@ -13,8 +13,8 @@ int angleToPulse(int angle) {
 }
 
 // Face Servos (Using PCA9685)
-const int Eye_Left_LR = 0; // currently inactive - possible damage in the PCA9685 that burns this specific motor
-const int Eye_Right_LR = 1; // works but due to the above's problem I might not use it...
+const int Eye_Left_LR = 0; 
+const int Eye_Right_LR = 1;
 const int Eye_Right_UD = 2;
 const int Check_L = 3;
 
@@ -59,33 +59,33 @@ void setup() {
   RollNeck.attach(13);
 
   // Set initial positions to rest positions
-  bicep.write(0);      
+  bicep.write(33);      
   rotate.write(90);    
   shoulder.write(130); 
   omoplate.write(70);
 
   Neck.write(60);
-  Jaw.write(100);
-  RollNeck.write(40);
+  Jaw.write(80);
+  RollNeck.write(70);
 
-  pwm.setPWM(Eye_Left_LR, 0, angleToPulse(100));
+  pwm.setPWM(Eye_Left_LR, 0, angleToPulse(120));
   pwm.setPWM(Eye_Right_LR, 0, angleToPulse(108));
-  pwm.setPWM(Eye_Right_UD, 0, angleToPulse(90));
+  pwm.setPWM(Eye_Right_UD, 0, angleToPulse(112));
   pwm.setPWM(Check_L, 0, angleToPulse(118));
 
-  pwm.setPWM(Check_R, 0, angleToPulse(90));
+  pwm.setPWM(Check_R, 0, angleToPulse(101));
   pwm.setPWM(Upper_Lip, 0, angleToPulse(67));
   pwm.setPWM(Eye_Left_UD, 0, angleToPulse(90));
   pwm.setPWM(Eyelid_Right_Lower, 0, angleToPulse(90));
 
-  pwm.setPWM(Eyebrow_R, 0, angleToPulse(90));
+  pwm.setPWM(Eyebrow_R, 0, angleToPulse(115));
   pwm.setPWM(Eyelid_Right_Upper, 0, angleToPulse(80));
   pwm.setPWM(Forhead_R, 0, angleToPulse(90));
   pwm.setPWM(Forhead_L, 0, angleToPulse(120));
 
-  pwm.setPWM(Eyebrow_L, 0, angleToPulse(90));
+  pwm.setPWM(Eyebrow_L, 0, angleToPulse(96));
   pwm.setPWM(Eyelid_Left_Down, 0, angleToPulse(90));
-  pwm.setPWM(Eyelid_Left_Up, 0, angleToPulse(55));
+  pwm.setPWM(Eyelid_Left_Up, 0, angleToPulse(72));
   pwm.setPWM(Rothead, 0, angleToPulse(90));
 }
 

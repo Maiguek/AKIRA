@@ -48,52 +48,53 @@ External hardware components needed for Akira:
 - Wiring and soldering meterials, etc.
 
 At this moment Akira has **successfully assemembled** his:
-- Face (_Note: due to a possible problem with the PCA9685, left eye LR sevomotor has burned twice_)
+- Face
 - Neck
 - Shoulders
 - Torso
 - Upper Stomach
 - Back
 - Power Distribution
-- Stand - Low Stomach _(Just assembled)_
+- Stand - Low Stomach
+- Left hand + forearm + bicep (_Just assembled and tested_)
 
 Out of these, the next are **totally functional** (I can control successfully all servomotors):
 - Face
 - Neck
 - Left Shoulder
+- Bicep
+- Hand
 
 #### Missing parts:
 
 To be **assembled**:
-- Biceps _(Being assembled currently)_
-- Hands _(Being assembled currently)_
 - Chest
-- Skin
+- Right hand, bicep, and forearm
+- Skin (_It is currently under makeup process. Silicone face has been already created!_)
 
-Already **fully printed**:
-- Biceps
-- Hands
-- Low Stomach
+To be **tested**:
+- Right hand, bicep, and forearm
+- Stomach and torso
 
-To be **printed**:
-- Chest
-- Forearm _(Currently printing)_
-- Wrist _(Currently printing)_
-
-Other hardware such as microphones and speakers are yet to be assembled.
+I am using external bluetooth speaker and usb microphone for conversational testing.
 
 ### Software and Conversational models
 
 I have been working using a custom conda environment with Python 3.11.10, and Arduino IDE for servo communication and testing. So far I have succeeded and have tested all current assembled servomotors using a custom GUI with Tkinter. ChatGPT helped me on developing quickly this GUI for the servo testing, which can be accessed in the file _ServoTesting.py_.
 
-Furthermore, I have now successfully came up with an initial version for the language generation part. By downloading free open-source **Llama3.2-3B** quantized models from Meta, I have been able to come up with an initial version that can generate Akira's text responses in accordance to a previous flow of conversation.
+Furthermore, I have now successfully came up with an initial version for the language generation part. By downloading free open-source **Llama3.2-3B** quantized models from Meta, I have been able to come up with an initial version that can generate Akira's text responses in accordance to a previous flow of conversation. With this, open source models for speech recognition and text-to-voice models have been implemented and tested all together with the language model to generate a conversational flow with turns (Akira talks, User talks...) Text-to-voice will be replaced by custom model soon.
+
+For vision I am using open source MediaPipe for detecting face and body. Models for detecting emotions, and user data are yet to be implemented with MediaPipe and there is still work on this matter. 
+
+Movement models have not been implemented yet, but inverse kinematic design for hand is in progress. Also, for facial expressions I have a crazy but cool idea which will require the vision models to work properly for that jeje. So still being implemented.
 
 Further testing and updates to the text conversational system are yet to be prepared, I am still testing this model on this mini PC without a GPU, and depending on how long or extensive the requests are, the PC is behaving differently and even turning itself off if the worload is too much. Therefore it is my task now to try to optimize this and see how to assemble a complete system that can run smoothly and produce good results, as many other tasks will run in parallel to the conversation (i.e. gesture and movement generation, and visual analyzis).
 
 My **current developing tasks** include preparing the following models:
 - _Language Model (Done! -> Optimize it and set conversational system)_
-- Vision Model
-- Listening Model
+- Vision Model (Partially done -> Implement models to analyze face and body)
+- _Listening Model (Done! -> Quite good performace so far. Upgrades are possible)_
+- Text-To-Voice Model (I am using a default open source one, but still need to implement one with my voice. Still in progress.)
 - Servo Control Model
 
 ## Research Goals

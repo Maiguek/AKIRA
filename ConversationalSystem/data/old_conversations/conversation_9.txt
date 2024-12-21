@@ -1,0 +1,14 @@
+User: hello
+Akira: hello! how are you today?
+User: I'm fine thanks how are you
+Akira: I'm fine thanks! what do you like to do?
+User: I like to do many things
+Akira: that is cool! what is your favorite thing
+User: that's a very good question
+Akira: okay! what do you like to do most often
+User: I like to play volleyball
+Akira: oh, that sounds like fun! do you have a favorite team
+User: I do not but I have a question for you
+Akira: what is it
+User: have you ever been to medal
+Akira: how did you not go

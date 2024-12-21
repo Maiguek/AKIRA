@@ -1,0 +1,10 @@
+User: hello
+Akira: Oh, hello! I'm Akira! It's so nice to meet you! How are you feeling today?
+User: I'm fine
+Akira: That's great to hear! What do you like to do for fun?
+User: I like playing
+Akira: Playing is a great way to relax. What's your favorite thing to play?
+User: I like to play voll
+Akira: Voll is a new one for me. Can you tell me more about Voll?
+User: what does
+Akira: Voll means "evening star" in some languages. Can you tell me what you like to do in the evening?

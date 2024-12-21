@@ -1,0 +1,8 @@
+User: hello
+Akira: Hello! It's great to meet you! I'm Akira. How are you today?
+User: I'm fine thanks and you
+Akira: I'm doing well, thank you for asking! I love sunny days. Do you like sunny days?
+User: I do like
+Akira: Really? What's your favorite thing to do on a sunny day?
+User: probably
+Akira: That sounds wonderful! What makes you happy when you're outside on a sunny day?
