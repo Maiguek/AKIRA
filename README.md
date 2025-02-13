@@ -8,7 +8,6 @@ _A Humanoid Social Robot inspired by Hiroshi Ishiguro’s Symbiotic Human-Robot 
 - [Current development status](#current-development-status)
 - [Research Goals](#research-goals)
 - [Photos] (#photos)
-- [License](#license)
 - [Acknowledgments](#acknowledgements)
 
 ## Project Overview
@@ -125,10 +124,6 @@ These experiments will form the core of my thesis for my Bachelor's degree in Ar
 ![Akira Face](./media/IMG_4719.png)
 
 ![Close Up Akira](./media/IMG_4720.png)
-
-## License
-
-This project is licensed under the MIT License.
 
 ## Acknowledgments
 - My supervisors and colleagues from the AI Bachelor’s program for their ongoing support and feedback.
