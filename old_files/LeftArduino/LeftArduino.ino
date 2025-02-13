@@ -44,6 +44,77 @@ Servo Neck; // Servo 20
 Servo Jaw; // Servo 21
 Servo RollNeck; // Servo 22
 
+// Define min and max positions for each servo (YOU FILL IN THE VALUES)
+int Eye_Left_LR_min = 90; 
+int Eye_Left_LR_max = 170; 
+
+int Eye_Right_LR_min = 45;
+int Eye_Right_LR_max = 135;
+
+int Eye_Right_UD_min = 80;
+int Eye_Right_UD_max = 135;
+
+int Check_L_min = 83;
+int Check_L_max = 135;
+
+int Check_R_min = 77;
+int Check_R_max = 133;
+
+int Upper_Lip_min = 65;
+int Upper_Lip_max = 99;
+
+int Eye_Left_UD_min = 54;
+int Eye_Left_UD_max = 110;
+
+int Eyelid_Right_Lower_min = 90;
+int Eyelid_Right_Lower_max = 120;
+
+int Eyebrow_R_min = 84;
+int Eyebrow_R_max = 140;
+
+int Eyelid_Right_Upper_min = 66;
+int Eyelid_Right_Upper_max = 100;
+
+int Forhead_R_min = 45;
+int Forhead_R_max = 116;
+
+int Forhead_L_min = 90;
+int Forhead_L_max = 150;
+
+int Eyebrow_L_min = 70;
+int Eyebrow_L_max = 125;
+
+int Eyelid_Left_Down_min = 80;
+int Eyelid_Left_Down_max = 100;
+
+int Eyelid_Left_Up_min = 63;
+int Eyelid_Left_Up_max = 100;
+
+int Rothead_min = 30;
+int Rothead_max = 150;
+
+// Min and max positions for the shoulder and jaw servos
+int bicep_min = 0;
+int bicep_max = 63;
+
+int rotate_min = 40;
+int rotate_max = 180;
+
+int shoulder_min = 0;
+int shoulder_max = 180;
+
+int omoplate_min = 10;
+int omoplate_max = 70;
+
+int Neck_min = 50;
+int Neck_max = 100;
+
+int Jaw_min = 80;
+int Jaw_max = 125;
+
+int RollNeck_min = 50;
+int RollNeck_max = 105;
+
 void setup() {
   Serial.begin(9600);
   pwm.begin();
@@ -94,37 +165,154 @@ void loop() {
     int servoNum = Serial.parseInt(); // Read the first integer (servo number)
     int angle = Serial.parseInt(); // Read the second integer (angle)
 
-    // Ensure angle is within range
+    // Ensure the angle stays within valid bounds
     if (angle < 0) angle = 0;
     if (angle > 180) angle = 180;
 
-    int pulseLength = angleToPulse(angle); // For the Servos of the Face
+    int pulseLength = angleToPulse(angle); // Convert angle to PWM pulse
 
     switch (servoNum) {
-      case 0: pwm.setPWM(Eye_Left_LR, 0, pulseLength); break;
-      case 1: pwm.setPWM(Eye_Right_LR, 0, pulseLength); break;
-      case 2: pwm.setPWM(Eye_Right_UD, 0, pulseLength); break;
-      case 3: pwm.setPWM(Check_L, 0, pulseLength); break;
-      case 4: pwm.setPWM(Check_R, 0, pulseLength); break;
-      case 5: pwm.setPWM(Upper_Lip, 0, pulseLength); break;
-      case 6: pwm.setPWM(Eye_Left_UD, 0, pulseLength); break;
-      case 7: pwm.setPWM(Eyelid_Right_Lower, 0, pulseLength); break;
-      case 8: pwm.setPWM(Eyebrow_R, 0, pulseLength); break;
-      case 9: pwm.setPWM(Eyelid_Right_Upper, 0, pulseLength); break;
-      case 10: pwm.setPWM(Forhead_R, 0, pulseLength); break;
-      case 11: pwm.setPWM(Forhead_L, 0, pulseLength); break;
-      case 12: pwm.setPWM(Eyebrow_L, 0, pulseLength); break;
-      case 13: pwm.setPWM(Eyelid_Left_Down, 0, pulseLength); break;
-      case 14: pwm.setPWM(Eyelid_Left_Up, 0, pulseLength); break;
-      case 15: pwm.setPWM(Rothead, 0, pulseLength); break;
-      case 16: bicep.write(angle); break;
-      case 17: rotate.write(angle); break;
-      case 18: shoulder.write(angle); break;
-      case 19: omoplate.write(angle); break;
-      case 20: Neck.write(angle); break;
-      case 21: Jaw.write(angle); break;
-      case 22: RollNeck.write(angle); break;
-      default: break;  // Ignore invalid servo numbers
+      case 0:
+        if (angle < Eye_Left_LR_min) angle = Eye_Left_LR_min;
+        if (angle > Eye_Left_LR_max) angle = Eye_Left_LR_max;
+        pwm.setPWM(Eye_Left_LR, 0, pulseLength);
+        break;
+
+      case 1:
+        if (angle < Eye_Right_LR_min) angle = Eye_Right_LR_min;
+        if (angle > Eye_Right_LR_max) angle = Eye_Right_LR_max;
+        pwm.setPWM(Eye_Right_LR, 0, pulseLength);
+        break;
+
+      case 2:
+        if (angle < Eye_Right_UD_min) angle = Eye_Right_UD_min;
+        if (angle > Eye_Right_UD_max) angle = Eye_Right_UD_max;
+        pwm.setPWM(Eye_Right_UD, 0, pulseLength);
+        break;
+
+      case 3:
+        if (angle < Check_L_min) angle = Check_L_min;
+        if (angle > Check_L_max) angle = Check_L_max;
+        pwm.setPWM(Check_L, 0, pulseLength);
+        break;
+
+      case 4:
+        if (angle < Check_R_min) angle = Check_R_min;
+        if (angle > Check_R_max) angle = Check_R_max;
+        pwm.setPWM(Check_R, 0, pulseLength);
+        break;
+
+      case 5:
+        if (angle < Upper_Lip_min) angle = Upper_Lip_min;
+        if (angle > Upper_Lip_max) angle = Upper_Lip_max;
+        pwm.setPWM(Upper_Lip, 0, pulseLength);
+        break;
+
+      case 6:
+        if (angle < Eye_Left_UD_min) angle = Eye_Left_UD_min;
+        if (angle > Eye_Left_UD_max) angle = Eye_Left_UD_max;
+        pwm.setPWM(Eye_Left_UD, 0, pulseLength);
+        break;
+
+      case 7:
+        if (angle < Eyelid_Right_Lower_min) angle = Eyelid_Right_Lower_min;
+        if (angle > Eyelid_Right_Lower_max) angle = Eyelid_Right_Lower_max;
+        pwm.setPWM(Eyelid_Right_Lower, 0, pulseLength);
+        break;
+
+      case 8:
+        if (angle < Eyebrow_R_min) angle = Eyebrow_R_min;
+        if (angle > Eyebrow_R_max) angle = Eyebrow_R_max;
+        pwm.setPWM(Eyebrow_R, 0, pulseLength);
+        break;
+
+      case 9:
+        if (angle < Eyelid_Right_Upper_min) angle = Eyelid_Right_Upper_min;
+        if (angle > Eyelid_Right_Upper_max) angle = Eyelid_Right_Upper_max;
+        pwm.setPWM(Eyelid_Right_Upper, 0, pulseLength);
+        break;
+
+      case 10:
+        if (angle < Forhead_R_min) angle = Forhead_R_min;
+        if (angle > Forhead_R_max) angle = Forhead_R_max;
+        pwm.setPWM(Forhead_R, 0, pulseLength);
+        break;
+
+      case 11:
+        if (angle < Forhead_L_min) angle = Forhead_L_min;
+        if (angle > Forhead_L_max) angle = Forhead_L_max;
+        pwm.setPWM(Forhead_L, 0, pulseLength);
+        break;
+
+      case 12:
+        if (angle < Eyebrow_L_min) angle = Eyebrow_L_min;
+        if (angle > Eyebrow_L_max) angle = Eyebrow_L_max;
+        pwm.setPWM(Eyebrow_L, 0, pulseLength);
+        break;
+
+      case 13:
+        if (angle < Eyelid_Left_Down_min) angle = Eyelid_Left_Down_min;
+        if (angle > Eyelid_Left_Down_max) angle = Eyelid_Left_Down_max;
+        pwm.setPWM(Eyelid_Left_Down, 0, pulseLength);
+        break;
+
+      case 14:
+        if (angle < Eyelid_Left_Up_min) angle = Eyelid_Left_Up_min;
+        if (angle > Eyelid_Left_Up_max) angle = Eyelid_Left_Up_max;
+        pwm.setPWM(Eyelid_Left_Up, 0, pulseLength);
+        break;
+
+      case 15:
+        if (angle < Rothead_min) angle = Rothead_min;
+        if (angle > Rothead_max) angle = Rothead_max;
+        pwm.setPWM(Rothead, 0, pulseLength);
+        break;
+
+      // Shoulder and Jaw Servos
+      case 16:
+        if (angle < bicep_min) angle = bicep_min;
+        if (angle > bicep_max) angle = bicep_max;
+        bicep.write(angle);
+        break;
+
+      case 17:
+        if (angle < rotate_min) angle = rotate_min;
+        if (angle > rotate_max) angle = rotate_max;
+        rotate.write(angle);
+        break;
+
+      case 18:
+        if (angle < shoulder_min) angle = shoulder_min;
+        if (angle > shoulder_max) angle = shoulder_max;
+        shoulder.write(angle);
+        break;
+
+      case 19:
+        if (angle < omoplate_min) angle = omoplate_min;
+        if (angle > omoplate_max) angle = omoplate_max;
+        omoplate.write(angle);
+        break;
+
+      case 20:
+        if (angle < Neck_min) angle = Neck_min;
+        if (angle > Neck_max) angle = Neck_max;
+        Neck.write(angle);
+        break;
+
+      case 21:
+        if (angle < Jaw_min) angle = Jaw_min;
+        if (angle > Jaw_max) angle = Jaw_max;
+        Jaw.write(angle);
+        break;
+
+      case 22:
+        if (angle < RollNeck_min) angle = RollNeck_min;
+        if (angle > RollNeck_max) angle = RollNeck_max;
+        RollNeck.write(angle);
+        break;
+
+      default:
+        break;  // Ignore invalid servo numbers
     }
   }
 }
