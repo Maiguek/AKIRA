@@ -1,10 +1,14 @@
 import threading
 import time
+import os
+import sys
 import random
 from perception.listening import Akira_Listen
 from cognition.dialogue_manager import Akira_Chat
 from action.speech_synthesis import Akira_Talk
 from action.motion_controller import MotionController
+
+sys.path.append(os.path.join(os.path.dirname(__file__), "action"))
 
 # Threading events for stopping background threads
 stop_blinking = threading.Event()
@@ -31,7 +35,8 @@ def main():
     mic_index = int(input("Enter the index of your microphone: "))
     listener.set_mic_index(mic_index)
 
-    voice = Akira_Talk(url_path="../../url.txt")
+    akira_voice_file = "action/output.wav"
+    voice = Akira_Talk(output_path = akira_voice_file, spec_path = "action/spec.png")
     mc = MotionController()
 
     # Start blinking and head movement threads
@@ -39,6 +44,8 @@ def main():
     head_thread = threading.Thread(target=move_head, args=(mc,))
     blink_thread.start()
     head_thread.start()
+
+    
 
     try:
         while True:
@@ -49,7 +56,7 @@ def main():
                     break
                 response = chat.generate_response(user_input)
                 print("Akira:", response)
-                akira_voice_file = voice.speak(response)
+                voice.speak(response)
                 mc.move_jaw_and_play(akira_voice_file)
 
     finally:

@@ -1,20 +1,39 @@
 import os
+import sys
 import shutil
 import requests
 from playsound import playsound
 from gradio_client import Client, handle_file
-from f5_tts.api import F5TTS
+
+sys.path.append(os.path.join(os.path.dirname(__file__), "f5_tts_"))
+
+try:
+    from f5_tts_.api import F5TTS
+except ModuleNotFoundError as e:
+    from action.f5_tts_.api import F5TTS
 
 
 class Akira_Talk:
-    def __init__(self, method="jetson", url_path = "../../../url.txt"):
+    def __init__(
+        self,
+        method="jetson",    
+        url_path = "../../../url.txt",
+        output_path = "./output.wav",
+        spec_path = "./spec.png"
+        ):
 
         self.method = method
         self.ref_audio_path = "/home/maiguek/Documents/PROJECTS/AKIRA/src/action/ref_audio.wav"
-
+        self.ref_text = "This is a test of my voice that I will use for cloning it and specially for the speech of Akira. Akira will have my voice and I hope it can mimic it very well. Thank you!"
+        self.output_path = output_path
+        self.spec_path = spec_path
+        
+        
         if self.method in ["jetson", "API", "laptop"]:
             if self.method == "jetson":
+                
                 self.f5tts = F5TTS()
+                
             elif self.method == "laptop":
                 if not os.path.exists(url_path):
                     raise FileNotFoundError(f"URL file not found: {url_path}")
@@ -30,10 +49,10 @@ class Akira_Talk:
         if self.method == "jetson":
             wav, sr, spect = self.f5tts.infer(
                 ref_file=self.ref_audio_path,
-                ref_text="This is a test of my voice that I will use for cloning it and specially for the speech of Akira. Akira will have my voice and I hope it can mimic it very well. Thank you!",
+                ref_text=self.ref_text,
                 gen_text=gen_text,
-                file_wave="./output.wav",
-                file_spect="./output.png",
+                file_wave=self.output_path,
+                file_spect=self.spec_path,
                 seed=-1  # random seed = -1
             )
             
@@ -56,7 +75,7 @@ class Akira_Talk:
             # only a limited amount of times available
             result = self.client.predict(
                             ref_audio_input=handle_file(self.ref_audio_path),
-                            ref_text_input="This is a test of my voice that I will use for cloning it and specially for the speech of Akira. Akira will have my voice and I hope it can mimic it very well. Thank you!",
+                            ref_text_input=self.ref_text,
                             gen_text_input=gen_text,
                             remove_silence=False,
                             cross_fade_duration_slider=0.15,
@@ -66,20 +85,18 @@ class Akira_Talk:
             )
             
             source = result[0]
-            destination = "./output.wav"
+            destination = self.output_path
             shutil.copy(source, destination)
         else:
             raise ValueError(f"Method {method} not found. Please try again!")
 
         if play:
-            playsound("output.wav")
-
-        return os.path.join(os.getcwd(), "output.wav")
+            playsound(self.output_path)
         
 
 
 if __name__ == "__main__":
     voice = Akira_Talk()
 
-    print(voice.speak("This is crazy man!"))
+    print(voice.speak("I would love to be cat. Real bad, you know!"))
             
