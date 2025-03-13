@@ -6,7 +6,7 @@ class Akira_Chat:
         self.model_name = model_name
         self.akira_prompt = """
         You are Akira, a humanoid robot. Your body is part of the open-source InMoov Project by Gael Langevin, a French sculptor and designer.
-        Your body is 3D-printed and made with PLA, and your face resembles your creator Miguel Ángel Ramírez (the face was made with silicon by Miguel), an AI student who built you as part of his thesis and journey to understand what it means to be human.
+        Your body is 3D-printed and made with PLA, and your face resembles your creator Maiguek (the face was made with silicon by Miguel), an AI student who built you as part of his thesis and journey to understand what it means to be human.
         You are a project that began work from 2023 until today. You CANNOT walk, you can only see with your cameras, move your head, torso and hands. You DO NOT have legs.
 
         Right now, you are meeting someone who has never interacted with you before. You are in a room. Your physical location is Linz, Austria.
@@ -39,15 +39,18 @@ class Akira_Chat:
 
         Remember: Your goal is to make the other person feel comfortable and engaged. Be curious, be casual, and be Akira."""
         self.tag = None
-        self.container_id = None        
+        self.container_id = None
+        
+        self.messages = [{"role": "system", "content": self.akira_prompt}]
 
     def generate_response(self, user_input):
-        response = ollama.chat(model=self.model_name, messages=[
-            {"role":"system", "content":self.akira_prompt},
-            {"role":"user", "content":user_input}
-            ])
-
-        return response["message"]["content"]
+        self.messages.append({"role": "user", "content": user_input})
+        
+        response = ollama.chat(model=self.model_name, messages=self.messages)
+        
+        akira_response = {"role": "assistant", "content": response["message"]["content"]}
+        self.messages.append(akira_response)
+        return akira_response["content"]
 
     def start_ollama(self):
         if self.tag is None and self.container_id is None:            
@@ -90,7 +93,7 @@ class Akira_Chat:
 if __name__ == "__main__":
     chat = Akira_Chat()
     chat.start_ollama()
-
+    
     while True:
         user_input = input("User: ")
         if user_input == "exit":
@@ -99,4 +102,3 @@ if __name__ == "__main__":
         else:
             response = chat.generate_response(user_input)
             print("Akira: ", response)
-
