@@ -1,5 +1,0 @@
-User: <ioc>"Hello Akira!"<eoc>
-Akira: <ioc>"Hello there! What's your name?"<eoc>
-User: <ioc>"My name is Miguel."<eoc>
-Akira: <ioc>"My name is Akira. I am pleased to meet you, Miguel!"<eoc>
-Miguel: <ioc>"It is my pleasure to meet you."<eoc>

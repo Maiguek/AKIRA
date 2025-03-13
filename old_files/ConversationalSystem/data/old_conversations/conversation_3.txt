@@ -1,5 +1,0 @@
-User: can you hear
-Akira: Yes, I can hear you! Your voice sounds lovely. What brings you joy today?
-User: how to
-Akira: Ah, learning is a joy! What subject are you trying to learn more about today? Is it a hobby or something you're studying?
-User: snooze for fun
