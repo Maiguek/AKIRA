@@ -44,6 +44,14 @@ Servo Neck; // Servo 20
 Servo Jaw; // Servo 21
 Servo RollNeck; // Servo 22
 
+// Hand servos
+Servo wrist; // Servo 23
+Servo ringfinger; // Servo 24
+Servo midfinger; // Servo 25
+Servo pinky; // Servo 26
+Servo index; // Servo 27
+Servo thumb; // Servo 28 (this number represents the position in the external list file with starting index 0)
+
 // Define min and max positions for each servo (YOU FILL IN THE VALUES)
 int Eye_Left_LR_min = 90; 
 int Eye_Left_LR_max = 170; 
@@ -115,6 +123,25 @@ int Jaw_max = 125;
 int RollNeck_min = 50;
 int RollNeck_max = 105;
 
+//Min and max positions for the hand
+int wrist_min = 0;
+int wrist_max = 180;
+
+int ringfinger_min = 10;
+int ringfinger_max = 170;
+
+int midfinger_min = 10;
+int midfinger_max = 160;
+
+int pinky_min = 10;
+int pinky_max = 160;
+
+int index_min = 0;
+int index_max = 150;
+
+int thumb_min = 60;
+int thumb_max = 170;
+
 void setup() {
   Serial.begin(9600);
   pwm.begin();
@@ -129,6 +156,13 @@ void setup() {
   Jaw.attach(41);
   RollNeck.attach(13);
 
+  wrist.attach(7);
+  ringfinger.attach(5);
+  midfinger.attach(4);
+  pinky.attach(6);
+  index.attach(3);
+  thumb.attach(2);
+
   // Set initial positions to rest positions
   bicep.write(33);      
   rotate.write(90);    
@@ -138,6 +172,13 @@ void setup() {
   Neck.write(60);
   Jaw.write(80);
   RollNeck.write(70);
+
+  wrist.write(90);
+  ringfinger.write(170);
+  midfinger.write(160);
+  pinky.write(160);
+  index.write(0);
+  thumb.write(60);
 
   pwm.setPWM(Eye_Left_LR, 0, angleToPulse(120));
   pwm.setPWM(Eye_Right_LR, 0, angleToPulse(108));
@@ -309,6 +350,42 @@ void loop() {
         if (angle < RollNeck_min) angle = RollNeck_min;
         if (angle > RollNeck_max) angle = RollNeck_max;
         RollNeck.write(angle);
+        break;
+
+      case 23:
+        if (angle < wrist_min) angle = wrist_min;
+        if (angle > wrist_max) angle = wrist_max;
+        wrist.write(angle);
+        break;
+
+      case 24:
+        if (angle < ringfinger_min) angle = ringfinger_min;
+        if (angle > ringfinger_max) angle = ringfinger_max;
+        ringfinger.write(angle);
+        break;
+
+      case 25:
+        if (angle < midfinger_min) angle = midfinger_min;
+        if (angle > midfinger_max) angle = midfinger_max;
+        midfinger.write(angle);
+        break;
+
+      case 26:
+        if (angle < pinky_min) angle = pinky_min;
+        if (angle > pinky_max) angle = pinky_max;
+        pinky.write(angle);
+        break;
+
+      case 27:
+        if (angle < index_min) angle = index_min;
+        if (angle > index_max) angle = index_max;
+        index.write(angle);
+        break;
+
+      case 28:
+        if (angle < thumb_min) angle = thumb_min;
+        if (angle > thumb_max) angle = thumb_max;
+        thumb.write(angle);
         break;
 
       default:

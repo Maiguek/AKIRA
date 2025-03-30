@@ -5,11 +5,11 @@ import tkinter as tk
 from tkinter import ttk
 
 # Set up the serial connection (adjust the port and baud rate as needed)
-arduino = serial.Serial('/dev/ttyACM0', 9600, timeout=1) 
+arduino = serial.Serial('/dev/ttyACM1', 9600, timeout=1) 
 time.sleep(2)  # Wait for the connection to initialize
 
 # Read the servo data from the CSV file
-df = pd.read_csv("servos_data_left.csv")
+df = pd.read_csv("servos_data_right.csv")
 
 servos_list = df.to_dict(orient="records")
 
