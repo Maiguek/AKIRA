@@ -69,46 +69,73 @@ class MotionController:
         self.move_head = True
 
     def move_jaw_and_play(self, audio_file="output.wav"):
-        """Plays the audio and moves the jaw in sync."""
-
+        """Plays the audio and moves the jaw in sync with an added oscillatory effect during speech."""
+        
         # Load the audio file
         y, sr = librosa.load(audio_file, sr=None)
-
+        
         # Compute short-time energy for jaw movement
         frame_length = 1024
         hop_length = 512
         energy = np.array([
             sum(abs(y[i:i+frame_length]**2)) for i in range(0, len(y), hop_length)
         ])
-
-        # Normalize to servo range
-        servo_min, servo_max, servo_index = self.servos_list["Jaw"]["min_pos"], self.servos_list["Jaw"]["max_pos"], self.servos_list["Jaw"]["index"]
+        
+        # Apply gain to boost energy dynamic range
+        gain = 3.0  # Adjust this factor as needed
+        energy = energy * gain
+        
+        # Direct normalization to map energy to the servo range
+        servo_min = self.servos_list["Jaw"]["min_pos"]
+        servo_max = self.servos_list["Jaw"]["max_pos"]
+        servo_index = self.servos_list["Jaw"]["index"]
         energy_norm = np.interp(energy, (energy.min(), energy.max()), (servo_min, servo_max))
-
-        # Apply Exponential Moving Average (EMA) for smoothness
-        alpha = 0.3
+        
+        # Optionally, apply Exponential Moving Average (EMA) for smoother motion
+        alpha = 0.3  # Increased responsiveness compared to 0.1
         smoothed_energy = np.zeros_like(energy_norm)
         smoothed_energy[0] = energy_norm[0]
-
         for i in range(1, len(energy_norm)):
             smoothed_energy[i] = alpha * energy_norm[i] + (1 - alpha) * smoothed_energy[i - 1]
-
+        
+        # Parameters for the oscillatory (open/close) movement
+        blend_factor = 0.5  # 0 means use only the normalized value; 1 means full oscillation
+        freq = 2.0        # Frequency in Hz for the open-close cycle
+        # Define a threshold: when the base angle is above this, we assume speech is occurring.
+        speech_threshold = servo_min + 0.1 * (servo_max - servo_min)
+        
         # Function to move the jaw in a separate thread
         def move_jaw():
-            for angle in smoothed_energy:
+            for i, base_angle in enumerate(smoothed_energy):
+                # Time in seconds for the current frame
+                t = i * hop_length / sr  
+                # Compute an oscillatory component (sine wave, normalized to [0, 1])
+                oscillation = (np.sin(2 * np.pi * freq * t) + 1) / 2  
+                
+                # If the base angle indicates speech (i.e. above our threshold), blend in the oscillation.
+                if base_angle > speech_threshold:
+                    # Oscillatory value mapping fully from closed (servo_min) to open (servo_max)
+                    oscillated_angle = servo_min + oscillation * (servo_max - servo_min)
+                    # Blend the base angle and oscillatory movement
+                    angle = (1 - blend_factor) * base_angle + blend_factor * oscillated_angle
+                else:
+                    angle = base_angle  # No oscillation if below threshold
+                
+                # Clamp the angle within the servo limits
+                angle = max(servo_min, min(angle, servo_max))
                 self.ser.write(f"{servo_index} {int(angle)}\n".encode())
                 time.sleep(hop_length / sr)
-
+        
         # Start jaw movement in a separate thread
         jaw_thread = threading.Thread(target=move_jaw)
         jaw_thread.start()
-
+        
         # Play the audio
         playsound(audio_file)
-
+        
         # Ensure the jaw movement finishes
         jaw_thread.join()
-
+    
     def blink_eyes(self, blink_duration=0.2):
         """
         Makes Akira blink by closing and reopening the eyelids.

@@ -56,7 +56,7 @@ Servo thumb; // Servo 28 (this number represents the position in the external li
 int Eye_Left_LR_min = 90; 
 int Eye_Left_LR_max = 170; 
 
-int Eye_Right_LR_min = 45;
+int Eye_Right_LR_min = 81;
 int Eye_Right_LR_max = 135;
 
 int Eye_Right_UD_min = 80;
@@ -74,14 +74,14 @@ int Upper_Lip_max = 99;
 int Eye_Left_UD_min = 54;
 int Eye_Left_UD_max = 110;
 
-int Eyelid_Right_Lower_min = 90;
-int Eyelid_Right_Lower_max = 120;
+int Eyelid_Right_Lower_min = 80; //
+int Eyelid_Right_Lower_max = 130; //
 
 int Eyebrow_R_min = 84;
 int Eyebrow_R_max = 140;
 
-int Eyelid_Right_Upper_min = 66;
-int Eyelid_Right_Upper_max = 100;
+int Eyelid_Right_Upper_min = 35; //
+int Eyelid_Right_Upper_max = 100; //
 
 int Forhead_R_min = 45;
 int Forhead_R_max = 116;
@@ -92,11 +92,11 @@ int Forhead_L_max = 150;
 int Eyebrow_L_min = 70;
 int Eyebrow_L_max = 125;
 
-int Eyelid_Left_Down_min = 80;
-int Eyelid_Left_Down_max = 100;
+int Eyelid_Left_Down_min = 40; //
+int Eyelid_Left_Down_max = 100; //
 
-int Eyelid_Left_Up_min = 63;
-int Eyelid_Left_Up_max = 100;
+int Eyelid_Left_Up_min = 40; //
+int Eyelid_Left_Up_max = 165; //
 
 int Rothead_min = 30;
 int Rothead_max = 150;
@@ -106,7 +106,7 @@ int bicep_min = 0;
 int bicep_max = 63;
 
 int rotate_min = 40;
-int rotate_max = 180;
+int rotate_max = 90;
 
 int shoulder_min = 0;
 int shoulder_max = 180;
