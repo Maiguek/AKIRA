@@ -19,8 +19,56 @@ class MotionController:
         for index in range(len(servos_list)):
             servos_list[index]["index"] = index 
         self.servos_list = {servos_list[index]["name"]:servos_list[index] for index in range(len(servos_list))}
-        self.move_head = True
         #print(self.servos_list)
+
+        # Initialize head positions with the rest positions for each head servo.
+        self.head_positions = {
+            "Neck": self.servos_list["Neck"]["rest_pos"],
+            "Rollneck": self.servos_list["Rollneck"]["rest_pos"],
+            "Rothead": self.servos_list["Rothead"]["rest_pos"]
+        }
+        
+        self.move_head = True
+
+    def move_head_relative(self, adjust_neck, adjust_rollneck, adjust_rothead):
+        """
+        Adjusts the head servos relative to their current positions.
+        The adjustments are clamped within each servo's minimum and maximum values.
+        """
+        # Retrieve the current positions
+        current_neck = self.head_positions["Neck"]
+        current_rollneck = self.head_positions["Rollneck"]
+        current_rothead = self.head_positions["Rothead"]
+
+        # Calculate new positions based on relative adjustments
+        new_neck = current_neck + adjust_neck
+        new_rollneck = current_rollneck + adjust_rollneck
+        new_rothead = current_rothead + adjust_rothead
+
+        # Clamp the new positions within the allowed ranges
+        neck_limits = (self.servos_list["Neck"]["min_pos"], self.servos_list["Neck"]["max_pos"])
+        rollneck_limits = (self.servos_list["Rollneck"]["min_pos"], self.servos_list["Rollneck"]["max_pos"])
+        rothead_limits = (self.servos_list["Rothead"]["min_pos"], self.servos_list["Rothead"]["max_pos"])
+        
+        new_neck = int(max(neck_limits[0], min(new_neck, neck_limits[1])))
+        new_rollneck = int(max(rollneck_limits[0], min(new_rollneck, rollneck_limits[1])))
+        new_rothead = int(max(rothead_limits[0], min(new_rothead, rothead_limits[1])))
+
+        # Update the stored current positions
+        self.head_positions["Neck"] = new_neck
+        self.head_positions["Rollneck"] = new_rollneck
+        self.head_positions["Rothead"] = new_rothead
+
+        # Get the indices for the servos
+        neck_index = self.servos_list["Neck"]["index"]
+        rollneck_index = self.servos_list["Rollneck"]["index"]
+        rothead_index = self.servos_list["Rothead"]["index"]
+
+        # Send the new positions to the Arduino
+        self.ser.write(f"{neck_index} {new_neck}\n".encode())
+        self.ser.write(f"{rollneck_index} {new_rollneck}\n".encode())
+        self.ser.write(f"{rothead_index} {new_rothead}\n".encode())
+
 
     def move_head_randomly(self):
         """

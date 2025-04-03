@@ -39,7 +39,7 @@ if __name__ == "__main__":
     IMG_HEIGHT, IMG_WIDTH = 48, 48
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = EmotionCNN().to(device)
-    model.load_state_dict(torch.load("best_emotion_detection_model.pth"))
+    model.load_state_dict(torch.load("emotion_detection_model.pth"))
     model.eval()
     class_labels = ["angry", "disgust", "fear", "happy", "neutral", "sad", "surprise"]
 

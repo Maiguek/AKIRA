@@ -1,4 +1,0 @@
-This is an example of the command needed for cloning my voice with F5-TTS:
-
-f5-tts_infer-cli --model "F5-TTS" --ref_audio "ref_audio.wav" --ref_text "This is a test of my voice that I will use for cloning it and specially for the speech of Akira. Akira will have my voice and I hope it can mimic it very well. Thank you!" --gen_text "Hello! Nice to meet you! My name is Akira."
-
