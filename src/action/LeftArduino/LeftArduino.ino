@@ -108,7 +108,7 @@ int bicep_max = 63;
 int rotate_min = 40;
 int rotate_max = 90;
 
-int shoulder_min = 0;
+int shoulder_min = 75;
 int shoulder_max = 180;
 
 int omoplate_min = 10;
@@ -166,7 +166,7 @@ void setup() {
   // Set initial positions to rest positions
   bicep.write(33);      
   rotate.write(90);    
-  shoulder.write(130); 
+  shoulder.write(145); 
   omoplate.write(70);
 
   Neck.write(60);

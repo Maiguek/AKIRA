@@ -10,20 +10,25 @@ from action.motion_controller import MotionController
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "action"))
 
-# Threading events for stopping background threads
-stop_blinking = threading.Event()
-stop_head_movement = threading.Event()
+def start_blinking(mc)
+    mc.start_blink_randomly()
+    blinking_thread = threading.Thread(target=mc.akira_blink_randomly)
+    blinking_thread.start()
+    return blinking_thread
 
-def blink_randomly(mc):
-    """ Makes Akira blink at random intervals until stopped. """
-    while not stop_blinking.is_set():
-        time.sleep(random.uniform(3, 7))  # Wait between 3 to 7 seconds
-        mc.blink_eyes()
+def stop_blinking(blinking_thread):
+    mc.stop_blink_randomly()
+    blinking_thread.join()
 
-def move_head(mc):
-    """ Runs head movement in a separate thread until stopped. """
-    while not stop_head_movement.is_set():
-        mc.move_head_randomly()
+def start_moving_head(mc):
+    mc.start_move_head_randomly()
+    moving_head_rand_thread = threading.Thread(target=mc.move_head_randomly)
+    moving_head_rand_thread.start()
+    return moving_head_rand_thread
+
+def stop_moving_head(moving_head_rand_thread):
+    mc.stop_move_head_randomly()
+    moving_head_rand_thread.join()
 
 def main():
     global stop_blinking, stop_head_movement
@@ -39,13 +44,8 @@ def main():
     voice = Akira_Talk(output_path = akira_voice_file, spec_path = "action/spec.png")
     mc = MotionController()
 
-    # Start blinking and head movement threads
-    blink_thread = threading.Thread(target=blink_randomly, args=(mc,))
-    head_thread = threading.Thread(target=move_head, args=(mc,))
-    blink_thread.start()
-    head_thread.start()
-
-    
+    moving_head_rand_thread = start_moving_head(mc)
+    blinking_thread = start_blinking(mc)
 
     try:
         while True:
@@ -62,16 +62,8 @@ def main():
     finally:
         print("Stopping background threads...")
 
-        mc.stop_head()
-
-        # Stop blinking and head movement **BEFORE** closing the serial port
-        stop_blinking.set()
-        stop_head_movement.set()
-
-        blink_thread.join()
-        head_thread.join()
-
-        # Now it's safe to close the serial connection
+        stop_blinking(blinking_thread)
+        stop_moving_head(moving_head_rand_thread)
         chat.stop_ollama()
         mc.close_connection()
 
