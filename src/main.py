@@ -30,6 +30,26 @@ def stop_moving_head(mc, moving_head_rand_thread):
     mc.stop_move_head_randomly()
     moving_head_rand_thread.join()
 
+def start_moving_hands(mc):
+    mc.start_move_hands_randomly()
+    moving_hands_rand_thread = threading.Thread(target=mc.akira_move_hands_randomly)
+    moving_hands_rand_thread.start()
+    return moving_hands_rand_thread
+
+def stop_moving_hands(mc, moving_hands_rand_thread):
+    mc.stop_move_hands_randomly()
+    moving_hands_rand_thread.join()
+
+def start_moving_arms(mc):
+    mc.start_move_arms_randomly()
+    moving_arms_rand_thread = threading.Thread(target=mc.akira_move_arms_randomly)
+    moving_arms_rand_thread.start()
+    return moving_arms_rand_thread
+
+def stop_moving_arms(mc, moving_arms_rand_thread):
+    mc.stop_move_arms_randomly()
+    moving_arms_rand_thread.join()
+
 def main():
     chat = Akira_Chat()
     chat.start_ollama()
@@ -45,6 +65,8 @@ def main():
 
     moving_head_rand_thread = start_moving_head(mc)
     blinking_thread = start_blinking(mc)
+    moving_hands_rand_thread = start_moving_hands(mc)
+    moving_arms_rand_thread = start_moving_arms(mc)
 
     try:
         while True:
@@ -62,6 +84,8 @@ def main():
         print("Stopping background threads...")
 
         # add for putting all servos in their rest positions before closing connection
+        stop_moving_arms(mc, moving_arms_rand_thread)
+        stop_moving_hands(mc, moving_hands_rand_thread)
         stop_blinking(mc, blinking_thread)
         stop_moving_head(mc, moving_head_rand_thread)
         chat.stop_ollama()

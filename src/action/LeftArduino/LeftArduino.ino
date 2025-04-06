@@ -202,194 +202,116 @@ void setup() {
 }
 
 void loop() {
-  if (Serial.available() > 0) {
-    int servoNum = Serial.parseInt(); // Read the first integer (servo number)
-    int angle = Serial.parseInt(); // Read the second integer (angle)
+  if (Serial.available()) {
+    int servoNum = Serial.parseInt(); // Read servo number
+    int angle = Serial.parseInt();    // Read angle
 
-    // Ensure the angle stays within valid bounds
-    if (angle < 0) angle = 0;
-    if (angle > 180) angle = 180;
+    // Clear any extra characters from the buffer
+    while (Serial.available()) Serial.read();
 
-    int pulseLength = angleToPulse(angle); // Convert angle to PWM pulse
+    // Clamp angle to [0, 180]
+    angle = constrain(angle, 0, 180);
 
     switch (servoNum) {
       case 0:
-        if (angle < Eye_Left_LR_min) angle = Eye_Left_LR_min;
-        if (angle > Eye_Left_LR_max) angle = Eye_Left_LR_max;
-        pwm.setPWM(Eye_Left_LR, 0, pulseLength);
+        pwm.setPWM(Eye_Left_LR, 0, angleToPulse(constrain(angle, Eye_Left_LR_min, Eye_Left_LR_max)));
         break;
-
       case 1:
-        if (angle < Eye_Right_LR_min) angle = Eye_Right_LR_min;
-        if (angle > Eye_Right_LR_max) angle = Eye_Right_LR_max;
-        pwm.setPWM(Eye_Right_LR, 0, pulseLength);
+        pwm.setPWM(Eye_Right_LR, 0, angleToPulse(constrain(angle, Eye_Right_LR_min, Eye_Right_LR_max)));
         break;
-
       case 2:
-        if (angle < Eye_Right_UD_min) angle = Eye_Right_UD_min;
-        if (angle > Eye_Right_UD_max) angle = Eye_Right_UD_max;
-        pwm.setPWM(Eye_Right_UD, 0, pulseLength);
+        pwm.setPWM(Eye_Right_UD, 0, angleToPulse(constrain(angle, Eye_Right_UD_min, Eye_Right_UD_max)));
         break;
-
       case 3:
-        if (angle < Check_L_min) angle = Check_L_min;
-        if (angle > Check_L_max) angle = Check_L_max;
-        pwm.setPWM(Check_L, 0, pulseLength);
+        pwm.setPWM(Check_L, 0, angleToPulse(constrain(angle, Check_L_min, Check_L_max)));
         break;
-
       case 4:
-        if (angle < Check_R_min) angle = Check_R_min;
-        if (angle > Check_R_max) angle = Check_R_max;
-        pwm.setPWM(Check_R, 0, pulseLength);
+        pwm.setPWM(Check_R, 0, angleToPulse(constrain(angle, Check_R_min, Check_R_max)));
         break;
-
       case 5:
-        if (angle < Upper_Lip_min) angle = Upper_Lip_min;
-        if (angle > Upper_Lip_max) angle = Upper_Lip_max;
-        pwm.setPWM(Upper_Lip, 0, pulseLength);
+        pwm.setPWM(Upper_Lip, 0, angleToPulse(constrain(angle, Upper_Lip_min, Upper_Lip_max)));
         break;
-
       case 6:
-        if (angle < Eye_Left_UD_min) angle = Eye_Left_UD_min;
-        if (angle > Eye_Left_UD_max) angle = Eye_Left_UD_max;
-        pwm.setPWM(Eye_Left_UD, 0, pulseLength);
+        pwm.setPWM(Eye_Left_UD, 0, angleToPulse(constrain(angle, Eye_Left_UD_min, Eye_Left_UD_max)));
         break;
-
       case 7:
-        if (angle < Eyelid_Right_Lower_min) angle = Eyelid_Right_Lower_min;
-        if (angle > Eyelid_Right_Lower_max) angle = Eyelid_Right_Lower_max;
-        pwm.setPWM(Eyelid_Right_Lower, 0, pulseLength);
+        pwm.setPWM(Eyelid_Right_Lower, 0, angleToPulse(constrain(angle, Eyelid_Right_Lower_min, Eyelid_Right_Lower_max)));
         break;
-
       case 8:
-        if (angle < Eyebrow_R_min) angle = Eyebrow_R_min;
-        if (angle > Eyebrow_R_max) angle = Eyebrow_R_max;
-        pwm.setPWM(Eyebrow_R, 0, pulseLength);
+        pwm.setPWM(Eyebrow_R, 0, angleToPulse(constrain(angle, Eyebrow_R_min, Eyebrow_R_max)));
         break;
-
       case 9:
-        if (angle < Eyelid_Right_Upper_min) angle = Eyelid_Right_Upper_min;
-        if (angle > Eyelid_Right_Upper_max) angle = Eyelid_Right_Upper_max;
-        pwm.setPWM(Eyelid_Right_Upper, 0, pulseLength);
+        pwm.setPWM(Eyelid_Right_Upper, 0, angleToPulse(constrain(angle, Eyelid_Right_Upper_min, Eyelid_Right_Upper_max)));
         break;
-
       case 10:
-        if (angle < Forhead_R_min) angle = Forhead_R_min;
-        if (angle > Forhead_R_max) angle = Forhead_R_max;
-        pwm.setPWM(Forhead_R, 0, pulseLength);
+        pwm.setPWM(Forhead_R, 0, angleToPulse(constrain(angle, Forhead_R_min, Forhead_R_max)));
         break;
-
       case 11:
-        if (angle < Forhead_L_min) angle = Forhead_L_min;
-        if (angle > Forhead_L_max) angle = Forhead_L_max;
-        pwm.setPWM(Forhead_L, 0, pulseLength);
+        pwm.setPWM(Forhead_L, 0, angleToPulse(constrain(angle, Forhead_L_min, Forhead_L_max)));
         break;
-
       case 12:
-        if (angle < Eyebrow_L_min) angle = Eyebrow_L_min;
-        if (angle > Eyebrow_L_max) angle = Eyebrow_L_max;
-        pwm.setPWM(Eyebrow_L, 0, pulseLength);
+        pwm.setPWM(Eyebrow_L, 0, angleToPulse(constrain(angle, Eyebrow_L_min, Eyebrow_L_max)));
         break;
-
       case 13:
-        if (angle < Eyelid_Left_Down_min) angle = Eyelid_Left_Down_min;
-        if (angle > Eyelid_Left_Down_max) angle = Eyelid_Left_Down_max;
-        pwm.setPWM(Eyelid_Left_Down, 0, pulseLength);
+        pwm.setPWM(Eyelid_Left_Down, 0, angleToPulse(constrain(angle, Eyelid_Left_Down_min, Eyelid_Left_Down_max)));
         break;
-
       case 14:
-        if (angle < Eyelid_Left_Up_min) angle = Eyelid_Left_Up_min;
-        if (angle > Eyelid_Left_Up_max) angle = Eyelid_Left_Up_max;
-        pwm.setPWM(Eyelid_Left_Up, 0, pulseLength);
+        pwm.setPWM(Eyelid_Left_Up, 0, angleToPulse(constrain(angle, Eyelid_Left_Up_min, Eyelid_Left_Up_max)));
         break;
-
       case 15:
-        if (angle < Rothead_min) angle = Rothead_min;
-        if (angle > Rothead_max) angle = Rothead_max;
-        pwm.setPWM(Rothead, 0, pulseLength);
+        pwm.setPWM(Rothead, 0, angleToPulse(constrain(angle, Rothead_min, Rothead_max)));
         break;
 
-      // Shoulder and Jaw Servos
+      // Shoulder and body servos
       case 16:
-        if (angle < bicep_min) angle = bicep_min;
-        if (angle > bicep_max) angle = bicep_max;
-        bicep.write(angle);
+        bicep.write(constrain(angle, bicep_min, bicep_max));
         break;
-
       case 17:
-        if (angle < rotate_min) angle = rotate_min;
-        if (angle > rotate_max) angle = rotate_max;
-        rotate.write(angle);
+        rotate.write(constrain(angle, rotate_min, rotate_max));
         break;
-
       case 18:
-        if (angle < shoulder_min) angle = shoulder_min;
-        if (angle > shoulder_max) angle = shoulder_max;
-        shoulder.write(angle);
+        shoulder.write(constrain(angle, shoulder_min, shoulder_max));
         break;
-
       case 19:
-        if (angle < omoplate_min) angle = omoplate_min;
-        if (angle > omoplate_max) angle = omoplate_max;
-        omoplate.write(angle);
+        omoplate.write(constrain(angle, omoplate_min, omoplate_max));
         break;
-
       case 20:
-        if (angle < Neck_min) angle = Neck_min;
-        if (angle > Neck_max) angle = Neck_max;
-        Neck.write(angle);
+        Neck.write(constrain(angle, Neck_min, Neck_max));
         break;
-
       case 21:
-        if (angle < Jaw_min) angle = Jaw_min;
-        if (angle > Jaw_max) angle = Jaw_max;
-        Jaw.write(angle);
+        Jaw.write(constrain(angle, Jaw_min, Jaw_max));
         break;
-
       case 22:
-        if (angle < RollNeck_min) angle = RollNeck_min;
-        if (angle > RollNeck_max) angle = RollNeck_max;
-        RollNeck.write(angle);
+        RollNeck.write(constrain(angle, RollNeck_min, RollNeck_max));
         break;
-
       case 23:
-        if (angle < wrist_min) angle = wrist_min;
-        if (angle > wrist_max) angle = wrist_max;
-        wrist.write(angle);
+        wrist.write(constrain(angle, wrist_min, wrist_max));
         break;
-
       case 24:
-        if (angle < ringfinger_min) angle = ringfinger_min;
-        if (angle > ringfinger_max) angle = ringfinger_max;
-        ringfinger.write(angle);
+        ringfinger.write(constrain(angle, ringfinger_min, ringfinger_max));
         break;
-
       case 25:
-        if (angle < midfinger_min) angle = midfinger_min;
-        if (angle > midfinger_max) angle = midfinger_max;
-        midfinger.write(angle);
+        midfinger.write(constrain(angle, midfinger_min, midfinger_max));
         break;
-
       case 26:
-        if (angle < pinky_min) angle = pinky_min;
-        if (angle > pinky_max) angle = pinky_max;
-        pinky.write(angle);
+        pinky.write(constrain(angle, pinky_min, pinky_max));
         break;
-
       case 27:
-        if (angle < index_min) angle = index_min;
-        if (angle > index_max) angle = index_max;
-        index.write(angle);
+        index.write(constrain(angle, index_min, index_max));
         break;
-
       case 28:
-        if (angle < thumb_min) angle = thumb_min;
-        if (angle > thumb_max) angle = thumb_max;
-        thumb.write(angle);
+        thumb.write(constrain(angle, thumb_min, thumb_max));
         break;
 
       default:
-        break;  // Ignore invalid servo numbers
+        Serial.println("Invalid servo number");
+        break;
     }
+
+    // Confirm back to Jetson
+    Serial.print("OK ");
+    Serial.print(servoNum);
+    Serial.print(" ");
+    Serial.println(angle);
   }
 }

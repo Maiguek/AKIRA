@@ -80,6 +80,9 @@ class MotionController:
             "OtherUp":self.akira_raise_finger
             }
         self.hand_status = "Open"
+
+        self.lock_left = threading.Lock()
+        self.lock_right = threading.Lock()
         
     def initiate_connection(self):
         self.arduino_left = serial.Serial(self.left_port , self.baud_rate, timeout=1)
@@ -91,6 +94,8 @@ class MotionController:
 
     def close_connection(self):
         if self.arduino_left is not None and self.arduino_right is not None:
+            self.all_rest()
+            time.sleep(15)
             self.arduino_left.close()
             self.arduino_right.close()
             print("Connection has been successfully closed!")
@@ -126,20 +131,22 @@ class MotionController:
                     if isinstance(angle, int) and angle >= 0 and angle <= 180:
                         if verbose:
                             print(f">>Moving {servo_name} ({servo_index}) to {angle} on arduino {arduino}.")
-                        self.arduino_left.write(f"{servo_index} {angle}\n".encode())
-                        response = self.arduino_left.readline().decode().strip()
-                        if verbose:
-                            print("Left arduino response:", response)
+                        with self.lock_left:
+                            self.arduino_left.write(f"{servo_index} {angle}\n".encode())
+                            response = self.arduino_left.readline().decode().strip()
+                            if verbose:
+                                print("Left arduino response:", response)
                         self.left_servos_list[servo_name]["current"] = angle
             elif arduino == "right":
                 if isinstance(servo_index, int) and servo_index > 0 and servo_index < self.num_right_servos:
                     if isinstance(angle, int) and angle >= 0 and angle <= 180:
                         if verbose:
                             print(f">>Moving {servo_name} ({servo_index}) to {angle} on arduino {arduino}.")
-                        self.arduino_right.write(f"{servo_index} {angle}\n".encode())
-                        response = self.arduino_right.readline().decode().strip()
-                        if verbose:
-                            print("Right arduino response:", response)
+                        with self.lock_right:
+                            self.arduino_right.write(f"{servo_index} {angle}\n".encode())
+                            response = self.arduino_right.readline().decode().strip()
+                            if verbose:
+                                print("Right arduino response:", response)
                         self.right_servos_list[servo_name]["current"] = angle
             else:
                 print(f"{arduino} arduino does not exist. Please try either 'left' or 'right'!")
@@ -438,23 +445,28 @@ class MotionController:
         self.move_arms_randomly = True
 
     def stop_move_arms_randomly(self):
-        self.move_arms_randomly = False    
+        self.move_arms_randomly = False
+
+    def all_rest(self, verbose=True):
+        print(">>Setting all servos to their rest positions!")
+        for arduino in ["left", "right"]:
+            if arduino == "left":
+                for servo_name in self.left_servos_list:
+                    servo_index, servo_rest, servo_min, servo_max, servo_current = self.get_servo_positions(servo_name=servo_name, arduino=arduino)
+                    self.send_command(servo_index, servo_rest, arduino, servo_name, verbose=verbose)
+                    time.sleep(0.1)
+            if arduino == "right":
+                for servo_name in self.right_servos_list:
+                    servo_index, servo_rest, servo_min, servo_max, servo_current = self.get_servo_positions(servo_name=servo_name, arduino=arduino)
+                    self.send_command(servo_index, servo_rest, arduino, servo_name, verbose=verbose)
+                    time.sleep(0.1)
 
     def test_any_servo_like_in_serial(self, servo_name, arduino, desired_position, verbose=True):
         servo_index, servo_rest, servo_min, servo_max, servo_current = self.get_servo_positions(servo_name=servo_name, arduino=arduino)
-        desired_position = int(max(servo_min, max(servo_max, desired_position)))
+        desired_position = int(max(servo_min, min(servo_max, desired_position)))
         self.send_command(servo_index, desired_position, arduino, servo_name, verbose=verbose)
 
-    def plot_shoulder_positions(self):
-        """
-        Creates two subplots (2 rows, 1 column):
-            Top    : Left shoulder servos (shoulder, omoplate, rotate, bicep)
-            Bottom : Right shoulder servos (shoulder, omoplate, rotate, bicep)
-        
-        Each servo is given a single x-value, and we plot three points for its
-        min, rest, and max positions. Both subplots will share the same
-        y-axis scale for easy comparison.
-        """       
+    def plot_shoulder_positions(self):      
         fig, (ax_left, ax_right) = plt.subplots(2, 1, figsize=(6, 8))
         x = range(len(self.shoulder_servos))  # e.g. 0,1,2,3 for 4 shoulder servos
         all_positions = []
@@ -545,10 +557,12 @@ if __name__ == "__main__":
             mc.akira_move_hands_randomly(True)
         elif command == "individual testing":
             while True:
-                user_input = input()
+                user_input = input("Move servo: ")
+                if user_input == "e":
+                    break
                 servo_name, arduino, desired_position = tuple(user_input.strip().split())
                 desired_position = int(desired_position)
-                test_any_servo_like_in_serial(servo_name, arduino, desired_position)
+                mc.test_any_servo_like_in_serial(servo_name, arduino, desired_position)
 
         elif command == "random arm":
             mc.akira_move_arms_randomly(True)

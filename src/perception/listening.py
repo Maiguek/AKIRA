@@ -62,8 +62,10 @@ if __name__ == "__main__":
     mic_index = int(input("Enter the index of your microphone: "))
 
     # Step 3: Test if the microphone is working
+    
     listener.test_microphone(mic_index)
+    listener.set_mic_index(mic_index)
 
     # Step 4: Run Speech Recognition
     print("Now testing speech recognition...")
-    print(listener.recognize_speech(mic_index))
+    print(listener.recognize_speech())
