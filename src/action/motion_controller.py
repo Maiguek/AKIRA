@@ -69,6 +69,8 @@ class MotionController:
         self.move_head_randomly = True
         self.blink_randomly = True
         self.move_hands_randomly = True
+        self.move_arms_randomly = True
+        
         self.hand_status_options = {
             "Open":self.akira_open_hand,
             "Close":self.akira_close_hand,
@@ -125,6 +127,9 @@ class MotionController:
                         if verbose:
                             print(f">>Moving {servo_name} ({servo_index}) to {angle} on arduino {arduino}.")
                         self.arduino_left.write(f"{servo_index} {angle}\n".encode())
+                        response = self.arduino_left.readline().decode().strip()
+                        if verbose:
+                            print("Left arduino response:", response)
                         self.left_servos_list[servo_name]["current"] = angle
             elif arduino == "right":
                 if isinstance(servo_index, int) and servo_index > 0 and servo_index < self.num_right_servos:
@@ -132,6 +137,9 @@ class MotionController:
                         if verbose:
                             print(f">>Moving {servo_name} ({servo_index}) to {angle} on arduino {arduino}.")
                         self.arduino_right.write(f"{servo_index} {angle}\n".encode())
+                        response = self.arduino_right.readline().decode().strip()
+                        if verbose:
+                            print("Right arduino response:", response)
                         self.right_servos_list[servo_name]["current"] = angle
             else:
                 print(f"{arduino} arduino does not exist. Please try either 'left' or 'right'!")
@@ -185,7 +193,7 @@ class MotionController:
             roll_target = random.randint(roll_min + 5, roll_max - 5)
             rot_target = random.randint(rot_min + 5, rot_max - 5)
             
-            distance = abs(neck_target - neck_rest)
+            distance = abs(neck_target - neck_rest) # for some reason this distance works very nice :)
             step_size = max(5, distance // 10)
 
             for _ in range(10):
@@ -377,6 +385,130 @@ class MotionController:
     def stop_move_hands_randomly(self):
         self.move_hands_randomly = False
 
+    def get_shoulder_servo_data(self, arduino):
+        shoulder_data = {}
+
+        for servo_name in self.shoulder_servos:
+            data = self.get_servo_positions(servo_name=servo_name, arduino=arduino)
+            if data is not None:
+                shoulder_data[servo_name] = data
+            else:
+                print(f"Warning: Could not retrieve data for {servo_name} on {arduino} side.")
+
+        return shoulder_data
+
+    def akira_move_arms_randomly(self, verbose=False):
+        while self.move_arms_randomly:
+            choice = random.choice(["left", "right", "both"])
+            if choice == "both":
+                arduinos_to_move = ["left", "right"]
+            else:
+                arduinos_to_move = [choice]
+        
+            for arduino in arduinos_to_move:
+                shoulder_name, omoplate_name, rotate_name, bicep_name = self.shoulder_servos
+
+                shoulder_index, shoulder_rest, shoulder_min, shoulder_max, shoulder_current = self.get_servo_positions(servo_name=shoulder_name, arduino=arduino)
+                omoplate_index, omoplate_rest, omoplate_min, omoplate_max, omoplate_current = self.get_servo_positions(servo_name=omoplate_name, arduino=arduino)
+                rotate_index, rotate_rest, rotate_min, rotate_max, rotate_current = self.get_servo_positions(servo_name=rotate_name, arduino=arduino)
+                bicep_index, bicep_rest, bicep_min, bicep_max, bicep_current = self.get_servo_positions(servo_name=bicep_name, arduino=arduino)
+
+                shoulder_target = random.randint(shoulder_min + 5, shoulder_max - 5)
+                omoplate_target = random.randint(omoplate_min + 5, omoplate_max - 5)
+                rotate_target = random.randint(rotate_min + 5, rotate_max - 5)
+                bicep_target = random.randint(bicep_min + 5, bicep_max - 5)
+
+                steps = 2
+                for _ in range(steps):
+                    shoulder_current += (shoulder_target - shoulder_current) / steps
+                    omoplate_current += (omoplate_target - omoplate_current) / steps
+                    rotate_current += (rotate_target - rotate_current) / steps
+                    bicep_current += (bicep_target - bicep_current) / steps
+
+                    self.send_command(shoulder_index, int(shoulder_current), arduino, shoulder_name, verbose=verbose)
+                    self.send_command(omoplate_index, int(omoplate_current), arduino, omoplate_name, verbose=verbose)
+                    self.send_command(rotate_index, int(rotate_current), arduino, rotate_name, verbose=verbose)
+                    self.send_command(bicep_index, int(bicep_current), arduino, bicep_name, verbose=verbose)
+
+                    time.sleep(0.1)
+
+            time.sleep(random.uniform(2, 6))
+            
+    def start_move_arms_randomly(self):
+        self.move_arms_randomly = True
+
+    def stop_move_arms_randomly(self):
+        self.move_arms_randomly = False    
+
+    def test_any_servo_like_in_serial(self, servo_name, arduino, desired_position, verbose=True):
+        servo_index, servo_rest, servo_min, servo_max, servo_current = self.get_servo_positions(servo_name=servo_name, arduino=arduino)
+        desired_position = int(max(servo_min, max(servo_max, desired_position)))
+        self.send_command(servo_index, desired_position, arduino, servo_name, verbose=verbose)
+
+    def plot_shoulder_positions(self):
+        """
+        Creates two subplots (2 rows, 1 column):
+            Top    : Left shoulder servos (shoulder, omoplate, rotate, bicep)
+            Bottom : Right shoulder servos (shoulder, omoplate, rotate, bicep)
+        
+        Each servo is given a single x-value, and we plot three points for its
+        min, rest, and max positions. Both subplots will share the same
+        y-axis scale for easy comparison.
+        """       
+        fig, (ax_left, ax_right) = plt.subplots(2, 1, figsize=(6, 8))
+        x = range(len(self.shoulder_servos))  # e.g. 0,1,2,3 for 4 shoulder servos
+        all_positions = []
+        
+        for i, servo_name in enumerate(self.shoulder_servos):
+            if servo_name in self.left_servos_list:
+                servo_info = self.left_servos_list[servo_name]
+                min_pos = servo_info["min_pos"]
+                rest_pos = servo_info["rest_pos"]
+                max_pos = servo_info["max_pos"]
+
+                # Plot three points for the servo at x = i
+                ax_left.scatter([i, i, i], [min_pos, rest_pos, max_pos])
+
+                # Collect for global y-limits
+                all_positions.extend([min_pos, rest_pos, max_pos])
+            else:
+                print(f"Warning: '{servo_name}' not in left_servos_list.")
+
+        ax_left.set_title("Left Shoulder Servos")
+        ax_left.set_ylabel("Position")
+        ax_left.set_xticks(list(x))
+        ax_left.set_xticklabels(self.shoulder_servos)
+
+        for i, servo_name in enumerate(self.shoulder_servos):
+            if servo_name in self.right_servos_list:
+                servo_info = self.right_servos_list[servo_name]
+                min_pos = servo_info["min_pos"]
+                rest_pos = servo_info["rest_pos"]
+                max_pos = servo_info["max_pos"]
+
+                ax_right.scatter([i, i, i], [min_pos, rest_pos, max_pos])
+                
+                # Collect for global y-limits
+                all_positions.extend([min_pos, rest_pos, max_pos])
+            else:
+                print(f"Warning: '{servo_name}' not in right_servos_list.")
+
+        ax_right.set_title("Right Shoulder Servos")
+        ax_right.set_ylabel("Position")
+        ax_right.set_xticks(list(x))
+        ax_right.set_xticklabels(self.shoulder_servos)
+
+        if all_positions:
+            margin = 5
+            y_min = min(all_positions) - margin
+            y_max = max(all_positions) + margin
+            ax_left.set_ylim([y_min, y_max])
+            ax_right.set_ylim([y_min, y_max])
+
+        plt.tight_layout()
+        plt.show()
+
+        
 
 if __name__ == "__main__":
     mc = MotionController(initialize_on_start=True)
@@ -387,15 +519,17 @@ if __name__ == "__main__":
     #mc.start_move_head_randomly()
     #head_thread = threading.Thread(target=mc.akira_move_head_randomly)
     #head_thread.start()
+
+    #mc.plot_shoulder_positions()
     
     while True:
         command = input("Command: ")
         if command == "e":
             break
-        elif command == "c":
+        elif command == "close hands":
             mc.akira_close_hand("left", True)
             mc.akira_close_hand("right", True)
-        elif command == "o":
+        elif command == "open hands":
             mc.akira_open_hand("left", True)
             mc.akira_open_hand("right", True)
         elif command == "ok":
@@ -404,31 +538,23 @@ if __name__ == "__main__":
         elif command == "point":
             mc.akira_index_up("left", True)
             mc.akira_index_up("right", True)
-        elif command == "ho":
+        elif command == "half open":
             mc.akira_half_close_hand("left", True)
             mc.akira_half_close_hand("right", True)
         elif command == "random_hands":
             mc.akira_move_hands_randomly(True)
+        elif command == "individual testing":
+            while True:
+                user_input = input()
+                servo_name, arduino, desired_position = tuple(user_input.strip().split())
+                desired_position = int(desired_position)
+                test_any_servo_like_in_serial(servo_name, arduino, desired_position)
+
+        elif command == "random arm":
+            mc.akira_move_arms_randomly(True)
+            
+            
             
     mc.close_connection()
     
     
-    
-
-    
-        
-
-    
-
-    """
-    # Send commands
-    arduino_left.write(b'MOVE_SERVO_1\n')
-    arduino_right.write(b'MOVE_SERVO_2\n')
-
-    # Optionally read responses
-    response1 = arduino_left.readline().decode().strip()
-    response2 = arduino_right.readline().decode().strip()
-
-    print("Arduino Left:", response1)
-    print("Arduino Right:", response2)
-    """

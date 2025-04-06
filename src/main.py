@@ -61,6 +61,7 @@ def main():
     finally:
         print("Stopping background threads...")
 
+        # add for putting all servos in their rest positions before closing connection
         stop_blinking(mc, blinking_thread)
         stop_moving_head(mc, moving_head_rand_thread)
         chat.stop_ollama()
