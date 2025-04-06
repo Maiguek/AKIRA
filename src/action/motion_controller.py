@@ -61,12 +61,23 @@ class MotionController:
         self.neck_servos = ("Neck", "Rollneck", "Rothead")
         self.shoulder_servos = ("shoulder", "omoplate", "rotate", "bicep")
         self.hand_servos = ("wrist", "ringfinger", "midfinger", "pinky", "index", "thumb")
+        self.finger_servos = ("ringfinger", "midfinger", "pinky", "index", "thumb")
         self.eyes_servos = ("Eyelid_Right_Upper", "Eyelid_Right_Lower", "Eyelid_Left_Down", "Eyelid_Left_Up")
         self.face_servos = ("Upper_Lip", "Check_L", "Check_R", "Forhead_R", "Forhead_L", "Jaw")
         self.mouth_servos = ("Upper_Lip", "Jaw")
 
         self.move_head_randomly = True
         self.blink_randomly = True
+        self.move_hands_randomly = True
+        self.hand_status_options = {
+            "Open":self.akira_open_hand,
+            "Close":self.akira_close_hand,
+            "HalfClose":self.akira_half_close_hand,
+            "IndexUp":self.akira_index_up,
+            "ThumbsUp":self.akira_thumbs_up,
+            "OtherUp":self.akira_raise_finger
+            }
+        self.hand_status = "Open"
         
     def initiate_connection(self):
         self.arduino_left = serial.Serial(self.left_port , self.baud_rate, timeout=1)
@@ -274,6 +285,98 @@ class MotionController:
             plt.tight_layout()
             plt.show()
 
+    def akira_open_hand(self, arduino, verbose=False):
+        if verbose:
+            print(f"Opening {arduino} hand.")
+        if arduino in ["left", "right"]:
+            for servo_name in self.finger_servos:
+                servo_index, servo_rest, servo_min, servo_max, servo_current = self.get_servo_positions(servo_name=servo_name, arduino=arduino)
+                self.send_command(servo_index, servo_rest, arduino, servo_name, verbose=verbose)
+                self.hand_status = "Open"
+                assert self.hand_status in list(self.hand_status_options.keys())
+        else:
+            print(f"{arduino} arduino is not valid! Please try again!")
+
+    def akira_half_close_hand(self, arduino, verbose=False):
+        if verbose:
+            print(f"Half closing {arduino} hand.")
+        if arduino in ["left", "right"]:
+            for servo_name in self.finger_servos:
+                servo_index, servo_rest, servo_min, servo_max, servo_current = self.get_servo_positions(servo_name=servo_name, arduino=arduino)
+                self.send_command(servo_index, int(((servo_max - servo_min) / 2) + servo_min), arduino, servo_name, verbose=verbose)
+                self.hand_status = "HalfClose"
+                assert self.hand_status in list(self.hand_status_options.keys())
+        else:
+            print(f"{arduino} arduino is not valid! Please try again!")
+
+    def akira_close_hand(self, arduino, verbose=False):
+        if verbose:
+            print(f"Closing {arduino} hand.")
+        if arduino in ["left", "right"]:
+            for servo_name in self.finger_servos:
+                servo_index, servo_rest, servo_min, servo_max, servo_current = self.get_servo_positions(servo_name=servo_name, arduino=arduino)
+                if servo_rest == servo_min:
+                    self.send_command(servo_index, servo_max, arduino, servo_name, verbose=verbose)
+                elif servo_rest == servo_max:
+                    self.send_command(servo_index, servo_min, arduino, servo_name, verbose=verbose)
+
+                self.hand_status = "Close"
+                assert self.hand_status in list(self.hand_status_options.keys())
+        else:
+            print(f"{arduino} arduino is not valid! Please try again!")
+
+    def akira_thumbs_up(self, arduino, verbose=False):
+        servo_name = "thumb"
+        self.akira_raise_finger([servo_name], arduino, verbose)
+        self.hand_status = "ThumbsUp"
+        assert self.hand_status in list(self.hand_status_options.keys())
+
+    def akira_index_up(self, arduino, verbose=False):
+        servo_name = "index"
+        self.akira_raise_finger([servo_name], arduino, verbose)
+        self.hand_status = "IndexUp"
+        assert self.hand_status in list(self.hand_status_options.keys())
+        
+    def akira_raise_finger(self, servo_name_list, arduino, verbose=False):
+        self.akira_close_hand(arduino, verbose)
+
+        if not isinstance(servo_name_list, list):
+            servo_name_list = [servo_name_list]
+            
+        for servo_name in servo_name_list:
+            if servo_name in self.finger_servos:
+                servo_index, servo_rest, servo_min, servo_max, servo_current = self.get_servo_positions(servo_name=servo_name, arduino=arduino)
+                self.send_command(servo_index, servo_rest, arduino, servo_name, verbose=verbose)
+        self.hand_status = "OtherUp"
+        assert self.hand_status in list(self.hand_status_options.keys())
+
+    def akira_move_hands_randomly(self, verbose=False):
+        while self.move_hands_randomly:
+            choice = random.choice(["left", "right", "both"])
+            if choice == "both":
+                arduinos_to_move = ["left", "right"]
+            else:
+                arduinos_to_move = [choice]
+                
+            for arduino in arduinos_to_move:
+                wrist_name = "wrist"
+                wrist_index, wrist_rest, wrist_min, wrist_max, wrist_current = self.get_servo_positions(servo_name=wrist_name, arduino=arduino)
+                wrist_angle = np.random.normal(loc = wrist_rest, scale = wrist_max - wrist_rest)
+                wrist_angle = int(max(wrist_min, min(wrist_max, wrist_angle)))
+                self.send_command(wrist_index, wrist_angle, arduino, wrist_name, verbose=verbose)
+
+                finger_action = random.choice(list(self.hand_status_options.keys()))
+                if finger_action != "OtherUp":
+                    self.hand_status_options[finger_action](arduino, verbose)                
+            
+            time.sleep(random.uniform(3, 7))
+
+    def start_move_hands_randomly(self):
+        self.move_hands_randomly = True
+
+    def stop_move_hands_randomly(self):
+        self.move_hands_randomly = False
+
 
 if __name__ == "__main__":
     mc = MotionController(initialize_on_start=True)
@@ -281,13 +384,35 @@ if __name__ == "__main__":
     #mc.akira_close_eyes()
     #time.sleep(5)
     #mc.akira_open_eyes()
-    mc.start_move_head_randomly()
-    head_thread = threading.Thread(target=mc.akira_move_head_randomly)
-    head_thread.start()
-    #time.sleep(5)
-    #mc.stop_move_head_randomly()
-    #head_thread.join()
-    #mc.close_connection()
+    #mc.start_move_head_randomly()
+    #head_thread = threading.Thread(target=mc.akira_move_head_randomly)
+    #head_thread.start()
+    
+    while True:
+        command = input("Command: ")
+        if command == "e":
+            break
+        elif command == "c":
+            mc.akira_close_hand("left", True)
+            mc.akira_close_hand("right", True)
+        elif command == "o":
+            mc.akira_open_hand("left", True)
+            mc.akira_open_hand("right", True)
+        elif command == "ok":
+            mc.akira_thumbs_up("left", True)
+            mc.akira_thumbs_up("right", True)
+        elif command == "point":
+            mc.akira_index_up("left", True)
+            mc.akira_index_up("right", True)
+        elif command == "ho":
+            mc.akira_half_close_hand("left", True)
+            mc.akira_half_close_hand("right", True)
+        elif command == "random_hands":
+            mc.akira_move_hands_randomly(True)
+            
+    mc.close_connection()
+    
+    
     
 
     
