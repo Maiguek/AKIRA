@@ -10,28 +10,27 @@ from action.motion_controller import MotionController
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "action"))
 
-def start_blinking(mc)
+def start_blinking(mc):
     mc.start_blink_randomly()
     blinking_thread = threading.Thread(target=mc.akira_blink_randomly)
     blinking_thread.start()
     return blinking_thread
 
-def stop_blinking(blinking_thread):
+def stop_blinking(mc, blinking_thread):
     mc.stop_blink_randomly()
     blinking_thread.join()
 
 def start_moving_head(mc):
     mc.start_move_head_randomly()
-    moving_head_rand_thread = threading.Thread(target=mc.move_head_randomly)
+    moving_head_rand_thread = threading.Thread(target=mc.akira_move_head_randomly)
     moving_head_rand_thread.start()
     return moving_head_rand_thread
 
-def stop_moving_head(moving_head_rand_thread):
+def stop_moving_head(mc, moving_head_rand_thread):
     mc.stop_move_head_randomly()
     moving_head_rand_thread.join()
 
 def main():
-    global stop_blinking, stop_head_movement
     chat = Akira_Chat()
     chat.start_ollama()
 
@@ -62,8 +61,8 @@ def main():
     finally:
         print("Stopping background threads...")
 
-        stop_blinking(blinking_thread)
-        stop_moving_head(moving_head_rand_thread)
+        stop_blinking(mc, blinking_thread)
+        stop_moving_head(mc, moving_head_rand_thread)
         chat.stop_ollama()
         mc.close_connection()
 
@@ -71,3 +70,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+    

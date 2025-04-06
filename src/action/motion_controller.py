@@ -7,6 +7,7 @@ import librosa
 import random
 import serial
 import time
+import os
 
 class MotionController:
     def __init__(
@@ -18,6 +19,10 @@ class MotionController:
         right_servos_file="servos_data_right.csv",
         initialize_on_start=True,
         ):
+
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        left_servos_file = os.path.join(current_dir, left_servos_file)
+        right_servos_file = os.path.join(current_dir, right_servos_file)
         
         self.left_port = left_port
         self.right_port = right_port
@@ -56,13 +61,12 @@ class MotionController:
         self.neck_servos = ("Neck", "Rollneck", "Rothead")
         self.shoulder_servos = ("shoulder", "omoplate", "rotate", "bicep")
         self.hand_servos = ("wrist", "ringfinger", "midfinger", "pinky", "index", "thumb")
-        self.eyes_servos = ("Eyelid_Right_Upper", "Eyelid_Right_Lower", "Eyelid_Left_Down", "Eyelid_Left_UP")
+        self.eyes_servos = ("Eyelid_Right_Upper", "Eyelid_Right_Lower", "Eyelid_Left_Down", "Eyelid_Left_Up")
         self.face_servos = ("Upper_Lip", "Check_L", "Check_R", "Forhead_R", "Forhead_L", "Jaw")
         self.mouth_servos = ("Upper_Lip", "Jaw")
 
-        self.move_head_randomly = False
-        self.flag_test = False
-        self.blink_randomly = False
+        self.move_head_randomly = True
+        self.blink_randomly = True
         
     def initiate_connection(self):
         self.arduino_left = serial.Serial(self.left_port , self.baud_rate, timeout=1)
@@ -157,22 +161,38 @@ class MotionController:
     def stop_blink_randomly(self):
         self.blink_randomly = False
 
-    def move_head_randomly(self):
+    def akira_move_head_randomly(self):
         arduino = "left"
-        while self.move_head_randomly:
-            for servo_name in self.neck_servos:
-                servo_index, servo_rest, servo_min, servo_max, servo_current = self.get_servo_positions(servo_name=servo_name, arduino=arduino)
+
+        neck_name, roll_name, rot_name = self.neck_servos
+        neck_index, neck_rest, neck_min, neck_max, neck_current = self.get_servo_positions(servo_name=neck_name, arduino=arduino)
+        roll_index, roll_rest, roll_min, roll_max, roll_current = self.get_servo_positions(servo_name=roll_name, arduino=arduino)
+        rot_index, rot_rest, rot_min, rot_max, rot_current = self.get_servo_positions(servo_name=rot_name, arduino=arduino)
+        
+        while self.move_head_randomly:            
+            neck_target = random.randint(neck_min + 5, neck_max - 5)
+            roll_target = random.randint(roll_min + 5, roll_max - 5)
+            rot_target = random.randint(rot_min + 5, rot_max - 5)
+            
+            distance = abs(neck_target - neck_rest)
+            step_size = max(5, distance // 10)
+
+            for _ in range(10):
+                neck_current += (neck_target - neck_current) / step_size
+                roll_current += (roll_target - roll_current) / step_size
+                rot_current += (rot_target - rot_current) / step_size
                 
-                servo_target = random.randint(servo_min + 5, servo_max - 5)
-                distance = abs(servo_target - servo_current)
-                step_size = max(5, distance // 10)
+                neck_angle = int(max(neck_min, min(neck_current, neck_max)))
+                roll_angle = int(max(roll_min, min(roll_current, roll_max)))
+                rot_angle = int(max(rot_min, min(rot_current, rot_max)))
+                
+                self.send_command(neck_index, neck_angle, arduino, neck_name)
+                self.send_command(roll_index, roll_angle, arduino, roll_name)
+                self.send_command(rot_index, rot_angle, arduino, rot_name)
+                
+                time.sleep(0.1)
 
-                for _ in range(10):
-                    servo_current += (servo_target - servo_current) / step_size
-                    self.send_command(servo_index, servo_current, arduino, servo_name)
-                    time.sleep(0.1)
-
-                time.sleep(random.uniform(2, 6))
+            time.sleep(random.uniform(2, 6))
 
     def start_move_head_randomly(self):
         self.move_head_randomly = True
@@ -257,8 +277,17 @@ class MotionController:
 
 if __name__ == "__main__":
     mc = MotionController(initialize_on_start=True)
-    mc.move_jaw_and_play(plot_debug=True)
-    mc.close_connection()
+    #mc.move_jaw_and_play(plot_debug=True)
+    #mc.akira_close_eyes()
+    #time.sleep(5)
+    #mc.akira_open_eyes()
+    mc.start_move_head_randomly()
+    head_thread = threading.Thread(target=mc.akira_move_head_randomly)
+    head_thread.start()
+    #time.sleep(5)
+    #mc.stop_move_head_randomly()
+    #head_thread.join()
+    #mc.close_connection()
     
 
     
