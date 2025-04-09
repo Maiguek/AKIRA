@@ -32,7 +32,10 @@ class Akira_Talk:
         if self.method in ["jetson", "API", "laptop"]:
             if self.method == "jetson":
                 
-                self.f5tts = F5TTS()
+                self.f5tts = F5TTS(
+                    ref_file=self.ref_audio_path, 
+                    ref_text=self.ref_text
+                )
                 
             elif self.method == "laptop":
                 if not os.path.exists(url_path):
