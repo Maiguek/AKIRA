@@ -24,6 +24,8 @@ from model.utils import seed_everything
 class F5TTS:
     def __init__(
         self,
+        ref_file, 
+        ref_text,
         model_type="F5-TTS",
         ckpt_file="",
         vocab_file="",
@@ -62,6 +64,7 @@ class F5TTS:
         self.load_ema_model(
             model_type, ckpt_file, vocoder_name, vocab_file, ode_method, use_ema, hf_cache_dir=hf_cache_dir
         )
+        self.ref_file, self.ref_text = preprocess_ref_audio_text(ref_file, ref_text, device=self.device)
 
     def load_vocoder_model(self, vocoder_name, local_path=None, hf_cache_dir=None):
         self.vocoder = load_vocoder(vocoder_name, local_path is not None, local_path, self.device, hf_cache_dir)
@@ -107,8 +110,6 @@ class F5TTS:
 
     def infer(
         self,
-        ref_file,
-        ref_text,
         gen_text,
         show_info=print,
         progress=tqdm,
@@ -129,11 +130,12 @@ class F5TTS:
         seed_everything(seed)
         self.seed = seed
 
-        ref_file, ref_text = preprocess_ref_audio_text(ref_file, ref_text, device=self.device)
+        # This was moved to the init of the class so it does not have to be run every time:
+        #ref_file, ref_text = preprocess_ref_audio_text(ref_file, ref_text, device=self.device)
 
         wav, sr, spect = infer_process(
-            ref_file,
-            ref_text,
+            self.ref_file,
+            self.ref_text,
             gen_text,
             self.ema_model,
             self.vocoder,
