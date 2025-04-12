@@ -49,6 +49,45 @@ class Akira_See:
 
         self.looking_at_person = True
 
+    def list_cameras(self, max_tested=5):
+        """
+        Returns a list of indices for cameras that can be opened.
+        By default, it checks camera indices 0 through 4.
+        """
+        available_cameras = []
+        for index in range(max_tested):
+            cap = cv2.VideoCapture(index)
+            if cap.isOpened():
+                available_cameras.append(index)
+                cap.release()
+        return available_cameras
+
+    def test_camera(index):
+        """
+        Opens the camera at `index`, displays a live feed,
+        and waits until 'q' is pressed to quit.
+        """
+        cap = cv2.VideoCapture(index)
+        if not cap.isOpened():
+            print(f"Could not open camera {index}.")
+            return
+
+        print(f"Testing camera index {index}. Press 'q' to quit this camera.")
+        while True:
+            ret, frame = cap.read()
+            if not ret:
+                print(f"Failed to read frame from camera {index}.")
+                break
+
+            cv2.imshow(f"Camera {index}", frame)
+
+            # Press 'q' to close the current camera window
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
+
+        cap.release()
+        cv2.destroyWindow(f"Camera {index}")    
+
     def describe_what_akira_sees(self, image_input, eliminate_photo=True, annotate_photo=False) -> str:
         """
         Generate a caption for the given image.
