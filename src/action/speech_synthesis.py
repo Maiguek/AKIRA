@@ -51,8 +51,6 @@ class Akira_Talk:
     def speak(self, gen_text, play=False):
         if self.method == "jetson":
             wav, sr, spect = self.f5tts.infer(
-                ref_file=self.ref_audio_path,
-                ref_text=self.ref_text,
                 gen_text=gen_text,
                 file_wave=self.output_path,
                 file_spect=self.spec_path,
@@ -101,5 +99,9 @@ class Akira_Talk:
 if __name__ == "__main__":
     voice = Akira_Talk()
 
-    print(voice.speak("I would love to be cat. Real bad, you know!"))
+    voice.speak(
+        gen_text="I would love to be cat. Real bad, you know!",
+        play=True
+        )
+        
             

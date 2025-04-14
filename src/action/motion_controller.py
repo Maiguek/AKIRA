@@ -558,7 +558,7 @@ class MotionController:
 if __name__ == "__main__":
     try:
         mc = MotionController(initialize_on_start=True)
-        #mc.move_jaw_and_play(plot_debug=True)
+        mc.move_jaw_and_play(plot_debug=True)
     finally:
         mc.close_connection()
     

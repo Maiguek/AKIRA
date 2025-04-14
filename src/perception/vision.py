@@ -86,7 +86,44 @@ class Akira_See:
                 break
 
         cap.release()
-        cv2.destroyWindow(f"Camera {index}")    
+        cv2.destroyWindow(f"Camera {index}")
+
+    def try_both(self):
+        cap0 = cv2.VideoCapture(0)
+        cap1 = cv2.VideoCapture(2)
+
+        # Check if both cameras opened successfully
+        if not cap0.isOpened():
+            print("Camera 0 could not be opened.")
+        if not cap1.isOpened():
+            print("Camera 1 could not be opened.")
+
+        if cap0.isOpened() and cap1.isOpened():
+            print("Both cameras opened successfully. Press 'q' to quit.")
+            while True:
+                ret0, frame0 = cap0.read()
+                ret1, frame1 = cap1.read()
+
+                if ret0 and ret1:
+                    # Resize for display purposes (optional)
+                    frame0 = cv2.resize(frame0, (320, 240))
+                    frame1 = cv2.resize(frame1, (320, 240))
+
+                    # Concatenate the two frames horizontally
+                    combined = cv2.hconcat([frame0, frame1])
+
+                    cv2.imshow("Camera 0 and 1", combined)
+                else:
+                    print("Could not read frames from both cameras.")
+                    break
+
+                if cv2.waitKey(1) & 0xFF == ord('q'):
+                    break
+
+        # Release everything when done
+        cap0.release()
+        cap1.release()
+        cv2.destroyAllWindows()
 
     def describe_what_akira_sees(self, image_input, eliminate_photo=True, annotate_photo=False) -> str:
         """
@@ -323,8 +360,7 @@ if __name__ == "__main__":
     #akira_vision.look_at_face(camera_index=0, exit_when_centered=False)
     
     for _ in range(3):
-        print(akira_vision.describe_image())
-        #print(akira_vision.describe_what_akira_sees())
+        print(akira_vision.describe_what_akira_sees(akira_vision.take_photo()))
         time.sleep(5)
     
     
