@@ -74,7 +74,7 @@ def main():
 
     akira_voice_file = "action/output.wav"
     voice = Akira_Talk(output_path = akira_voice_file, spec_path = "action/spec.png")
-    mc = MotionController()
+    mc = MotionController(verbose=False)
 
     akira_vision = Akira_See(motion_controller=mc)
 
@@ -82,11 +82,11 @@ def main():
  
     try:
         while True:
+            program_input = input(">>> Write 'start' to begin a new conversation, or 'stop' to stop the program: ")
+            
             moving_hands_rand_thread = start_moving_hands_rand(mc)
             moving_arms_rand_thread = start_moving_arms_rand(mc)
             moving_head_rand_thread = start_moving_head_rand(mc)
-            
-            program_input = input(">>> Write 'start' to begin a new conversation, or 'stop' to stop the program: ")
             
             if program_input == "start":
                 while True:
@@ -95,7 +95,7 @@ def main():
                     stop_moving_hands_rand(mc, moving_hands_rand_thread)
                     stop_moving_arms_rand(mc, moving_arms_rand_thread)
                     mc.arms_rest()
-                    looking_at_thread = start_looking_at(akira_vision)
+                    #looking_at_thread = start_looking_at(akira_vision)
                     
                     user_input = listener.recognize_speech()
                     if user_input:
@@ -108,7 +108,7 @@ def main():
 
                         # Akira will appear to be thinking while we generate an answer
                         stop_blinking(mc, blinking_thread)
-                        stop_looking_at(akira_vision, looking_at_thread)
+                        #stop_looking_at(akira_vision, looking_at_thread)
                         mc.akira_close_eyes()
                         mc.akira_close_hand(arduino="left")
                         mc.akira_index_up(arduino="right")

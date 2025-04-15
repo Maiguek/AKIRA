@@ -18,7 +18,10 @@ class MotionController:
         left_servos_file="servos_data_left.csv",
         right_servos_file="servos_data_right.csv",
         initialize_on_start=True,
+        verbose=False
         ):
+
+        self.verbose = verbose
 
         current_dir = os.path.dirname(os.path.abspath(__file__))
         left_servos_file = os.path.join(current_dir, left_servos_file)
@@ -83,6 +86,17 @@ class MotionController:
 
         self.lock_left = threading.Lock()
         self.lock_right = threading.Lock()
+
+        # To avoid too many commands being sent to each arduino
+        self.command_counters = {
+            "left": {"count": 0, "window_start": time.time()},
+            "right": {"count": 0, "window_start": time.time()}
+        }
+        # Maximum commands allowed per time window (e.g., 10 per second)
+        self.max_commands = 10
+        # Length of the time window (in seconds)
+        self.window_duration = 1.0
+
         
     def initiate_connection(self):
         self.arduino_left = serial.Serial(self.left_port , self.baud_rate, timeout=1)
@@ -94,6 +108,7 @@ class MotionController:
 
     def close_connection(self):
         if self.arduino_left is not None and self.arduino_right is not None:
+            time.sleep(5)
             self.all_rest()
             time.sleep(15)
             self.arduino_left.close()
@@ -130,7 +145,63 @@ class MotionController:
         elif arduino == "right":
             self.right_servos_list[servo_name]["current"] = angle
 
-    def send_command(self, servo_index, angle, arduino, servo_name, verbose=False):
+    def send_command(self, servo_index, angle, arduino, servo_name):
+        if not self.connection_status:
+            print(f"Connection status: {self.connection_status}")
+            return
+        
+        # Determine current time and select the appropriate counter
+        now = time.time()
+        if arduino not in self.command_counters:
+            print(f"{arduino} arduino does not exist. Please try either 'left' or 'right'!")
+            return
+
+        # Check if the current time window has expired, if so reset the counter
+        if now - self.command_counters[arduino]["window_start"] >= self.window_duration:
+            self.command_counters[arduino]["window_start"] = now
+            self.command_counters[arduino]["count"] = 0
+
+        # If the count exceeds our maximum allowed, wait for the window to reset
+        if self.command_counters[arduino]["count"] >= self.max_commands:
+            wait_time = max(0, self.window_duration - (now - self.command_counters[arduino]["window_start"]))
+            if self.verbose:
+                print(f"Throttling: Too many commands for {arduino} Arduino. Sleeping for {wait_time:.2f} seconds.")
+            time.sleep(wait_time)
+            # After sleeping, reset the counter and window start time
+            self.command_counters[arduino]["window_start"] = time.time()
+            self.command_counters[arduino]["count"] = 0
+
+        # Now increment the counter for this command
+        self.command_counters[arduino]["count"] += 1
+
+        # Proceed with the rest of your existing send_command logic
+        if arduino == "left":
+            if isinstance(servo_index, int) and 0 < servo_index < self.num_left_servos:
+                if isinstance(angle, int) and 0 <= angle <= 180:
+                    if self.verbose:
+                        print(f">>Moving {servo_name} ({servo_index}) to {angle} on arduino {arduino}.")
+                    with self.lock_left:
+                        self.arduino_left.write(f"{servo_index} {angle}\n".encode())
+                        if self.verbose:
+                            response = self.arduino_left.readline().decode().strip()
+                            print("Left arduino response:", response)
+                    self.left_servos_list[servo_name]["current"] = angle
+        elif arduino == "right":
+            if isinstance(servo_index, int) and 0 < servo_index < self.num_right_servos:
+                if isinstance(angle, int) and 0 <= angle <= 180:
+                    if self.verbose:
+                        print(f">>Moving {servo_name} ({servo_index}) to {angle} on arduino {arduino}.")
+                    with self.lock_right:
+                        self.arduino_right.write(f"{servo_index} {angle}\n".encode())
+                        if self.verbose:
+                            response = self.arduino_right.readline().decode().strip()
+                            print("Right arduino response:", response)
+                    self.right_servos_list[servo_name]["current"] = angle
+        else:
+            print(f"{arduino} arduino does not exist. Please try either 'left' or 'right'!")
+
+
+    def send_command_old(self, servo_index, angle, arduino, servo_name, verbose=False):
         if self.connection_status:
             if arduino == "left":
                 if isinstance(servo_index, int) and servo_index > 0 and servo_index < self.num_left_servos:
@@ -179,7 +250,7 @@ class MotionController:
                     self.send_command(servo_index, servo_min, arduino, servo_name)
                 else:
                     self.send_command(servo_index, servo_max, arduino, servo_name)
-                        
+        
     def akira_blink_randomly(self, blink_duration=0.2):
         while self.blink_randomly:
             self.akira_close_eyes()
@@ -235,7 +306,7 @@ class MotionController:
     def move_jaw_and_play(self, audio_file="output.wav", plot_debug=False):
         arduino = "left"
         
-        # Load audio and extract energy profile (same as before)
+        # Load audio and compute energy per frame
         y, sr = librosa.load(audio_file, sr=None)
         frame_length = 1024
         hop_length = 512
@@ -243,50 +314,78 @@ class MotionController:
             sum(abs(y[i:i+frame_length]**2)) for i in range(0, len(y), hop_length)
         ])
         
+        # Normalize energy to [0, 1]
+        norm_energy = (energy - energy.min()) / (energy.max() - energy.min())
+        
+        # Get servo positions for Jaw and Upper Lip
         jaw_name = "Jaw"
-        jaw_index, jaw_rest, jaw_min, jaw_max, jaw_current = self.get_servo_positions(servo_name=jaw_name, arduino=arduino)
+        jaw_index, jaw_rest, jaw_min, jaw_max, _ = self.get_servo_positions(jaw_name, arduino)
         upper_name = "Upper_Lip"
-        upper_index, upper_rest, upper_min, upper_max, upper_current = self.get_servo_positions(servo_name=upper_name, arduino=arduino)
+        upper_index, upper_rest, upper_min, upper_max, _ = self.get_servo_positions(upper_name, arduino)
         
-        jaw_angles = np.interp(energy, (energy.min(), energy.max()), (jaw_min, jaw_max))
+        # Define thresholds for states based on normalized energy
+        threshold_half = 0.05   # below this, mouth is considered closed
+        threshold_full = 0.3  # above this, fully open
         
-        alpha = 0.1
-        smoothed_jaw = np.zeros_like(jaw_angles)
-        smoothed_jaw[0] = jaw_angles[0]
-        for i in range(1, len(jaw_angles)):
-            smoothed_jaw[i] = alpha * jaw_angles[i] + (1 - alpha) * smoothed_jaw[i - 1]
+        def determine_state(n_energy):
+            if n_energy < threshold_half:
+                return "closed"
+            elif n_energy < threshold_full:
+                return "half"
+            else:
+                return "full"
+        
+        # Map states to servo angles (modify as needed)
+        state_angles = {
+            "closed": {"jaw": jaw_min, "upper": upper_min},
+            "half": {"jaw": int((jaw_min + jaw_max) / 2), "upper": int((upper_min + upper_max) / 2)},
+            "full": {"jaw": jaw_max, "upper": upper_max}
+        }
+        
+        # Calculate frame interval and total duration
+        frame_interval = hop_length / sr
+        audio_duration = len(y) / sr  # duration in seconds
+        
+        # Create an event to signal when audio playback has finished
+        audio_finished = threading.Event()
+        current_state = None  # To track the previous state
         
         def move_mouth():
-            # Wait until the event is triggered so that start time is synchronized
-            frame_interval = hop_length / sr
-            prev_time = time.time()
-            for i, raw_angle in enumerate(smoothed_jaw):
-                jaw_angle = raw_angle + np.log1p(raw_angle - jaw_min) * 5
-                jaw_angle = int(max(jaw_min, min(jaw_angle, jaw_max)))
+            nonlocal current_state
+            start_time = time.time()
+            # Loop until the elapsed time exceeds audio duration or the audio finishes
+            while (time.time() - start_time) < audio_duration and not audio_finished.is_set():
+                elapsed = time.time() - start_time
+                # Determine which frame should be current based on elapsed time
+                frame_idx = int(elapsed / frame_interval)
+                if frame_idx >= len(norm_energy):
+                    break  # In case rounding creates an index out of bound
                 
-                # Calculate normalized factor (0 = closed, 1 = open)
-                factor = (jaw_angle - jaw_min) / float(jaw_max - jaw_min)
-                # Map the factor to the upper lip's range
-                upper_angle = int(upper_min + factor * (upper_max - upper_min))
-                
-                self.send_command(jaw_index, jaw_angle, arduino, jaw_name)
-                self.send_command(upper_index, upper_angle, arduino, upper_name)              
-
-                current_time = time.time()
-                elapsed = current_time - prev_time
-                sleep_time = frame_interval - elapsed
-                print(f"Frame {i}: sleep for {sleep_time:.4f} seconds")
-                if sleep_time > 0:
-                    time.sleep(sleep_time)
-                prev_time = time.time()
+                desired_state = determine_state(norm_energy[frame_idx])
+                # Only update if there is a state change
+                if desired_state != current_state:
+                    angles = state_angles[desired_state]
+                    self.send_command(jaw_index, angles["jaw"], arduino, jaw_name)
+                    self.send_command(upper_index, angles["upper"], arduino, upper_name)
+                    current_state = desired_state
+                    print(f"Elapsed {elapsed:.2f}s, frame {frame_idx}: Changed state to {desired_state}")
+                # Sleep a short time before checking again
+                time.sleep(0.005)
+            
+            # Once audio is done, optionally return the mouth to a rest/closed position
+            final_state = state_angles["closed"]
+            self.send_command(jaw_index, final_state["jaw"], arduino, jaw_name)
+            self.send_command(upper_index, final_state["upper"], arduino, upper_name)
+            print("Audio finished, stopping mouth movement.")
         
         def play_audio():
             playsound(audio_file)
+            audio_finished.set()  # Signal that the audio playback has finished
         
+        # Start both threads concurrently
         jaw_thread = threading.Thread(target=move_mouth)
         audio_thread = threading.Thread(target=play_audio)
         
-        # Start both threads
         jaw_thread.start()
         audio_thread.start()
         
@@ -295,81 +394,80 @@ class MotionController:
         
         if plot_debug:
             import matplotlib.pyplot as plt
-            plt.subplot(5, 1, 1)
+            plt.figure(figsize=(10, 8))
+            plt.subplot(4, 1, 1)
             plt.plot(y)
             plt.title("Audio Signal")
-            plt.subplot(5, 1, 2)
+            plt.subplot(4, 1, 2)
             plt.plot(energy)
             plt.title("Energy")
-            plt.subplot(5, 1, 3)
-            plt.plot(jaw_angles)
-            plt.title("Jaw Angles (Raw)")
-            plt.subplot(5, 1, 4)
-            plt.plot(smoothed_jaw)
-            plt.title("Smoothed Jaw Angles")
-            plt.subplot(5, 1, 5)
-            factor_array = (smoothed_jaw - jaw_min) / (jaw_max - jaw_min)
-            upper_angles = upper_min + factor_array * (upper_max - upper_min)
-            plt.plot(upper_angles)
-            plt.title("Upper Lip Angles")
+            plt.subplot(4, 1, 3)
+            plt.plot(norm_energy)
+            plt.title("Normalized Energy")
+            # For visualization, convert states into numeric values (0=closed, 1=half, 2=full)
+            state_numeric = [0 if determine_state(ne) == "closed" 
+                             else 1 if determine_state(ne) == "half" 
+                             else 2 for ne in norm_energy]
+            plt.subplot(4, 1, 4)
+            plt.plot(state_numeric, 'o-')
+            plt.title("Mouth State (0=closed, 1=half, 2=full)")
             plt.tight_layout()
             plt.show()
 
-
-    def akira_open_hand(self, arduino, verbose=False):
-        if verbose:
+    def akira_open_hand(self, arduino):
+        if self.verbose:
             print(f"Opening {arduino} hand.")
         if arduino in ["left", "right"]:
             for servo_name in self.finger_servos:
                 servo_index, servo_rest, servo_min, servo_max, servo_current = self.get_servo_positions(servo_name=servo_name, arduino=arduino)
-                self.send_command(servo_index, servo_rest, arduino, servo_name, verbose=verbose)
+                self.send_command(servo_index, servo_rest, arduino, servo_name)
                 self.hand_status = "Open"
                 assert self.hand_status in list(self.hand_status_options.keys())
         else:
             print(f"{arduino} arduino is not valid! Please try again!")
 
-    def akira_half_close_hand(self, arduino, verbose=False):
-        if verbose:
+    def akira_half_close_hand(self, arduino):
+        if self.verbose:
             print(f"Half closing {arduino} hand.")
         if arduino in ["left", "right"]:
             for servo_name in self.finger_servos:
                 servo_index, servo_rest, servo_min, servo_max, servo_current = self.get_servo_positions(servo_name=servo_name, arduino=arduino)
-                self.send_command(servo_index, int(((servo_max - servo_min) / 2) + servo_min), arduino, servo_name, verbose=verbose)
+                self.send_command(servo_index, int(((servo_max - servo_min) / 2) + servo_min), arduino, servo_name)
                 self.hand_status = "HalfClose"
                 assert self.hand_status in list(self.hand_status_options.keys())
         else:
             print(f"{arduino} arduino is not valid! Please try again!")
 
-    def akira_close_hand(self, arduino, verbose=False):
-        if verbose:
+    def akira_close_hand(self, arduino):
+        if self.verbose:
             print(f"Closing {arduino} hand.")
         if arduino in ["left", "right"]:
             for servo_name in self.finger_servos:
                 servo_index, servo_rest, servo_min, servo_max, servo_current = self.get_servo_positions(servo_name=servo_name, arduino=arduino)
                 if servo_rest == servo_min:
-                    self.send_command(servo_index, servo_max, arduino, servo_name, verbose=verbose)
+                    self.send_command(servo_index, servo_max, arduino, servo_name)
                 elif servo_rest == servo_max:
-                    self.send_command(servo_index, servo_min, arduino, servo_name, verbose=verbose)
+                    self.send_command(servo_index, servo_min, arduino, servo_name)
 
                 self.hand_status = "Close"
                 assert self.hand_status in list(self.hand_status_options.keys())
         else:
             print(f"{arduino} arduino is not valid! Please try again!")
 
-    def akira_thumbs_up(self, arduino, verbose=False):
+    def akira_thumbs_up(self, arduino):
         servo_name = "thumb"
-        self.akira_raise_finger([servo_name], arduino, verbose)
+        self.akira_raise_finger([servo_name], arduino)
         self.hand_status = "ThumbsUp"
         assert self.hand_status in list(self.hand_status_options.keys())
 
-    def akira_index_up(self, arduino, verbose=False):
+    def akira_index_up(self, arduino):
         servo_name = "index"
-        self.akira_raise_finger([servo_name], arduino, verbose)
+        self.akira_raise_finger([servo_name], arduino)
         self.hand_status = "IndexUp"
         assert self.hand_status in list(self.hand_status_options.keys())
         
-    def akira_raise_finger(self, servo_name_list, arduino, verbose=False):
-        self.akira_close_hand(arduino, verbose)
+    def akira_raise_finger(self, servo_name_list, arduino):
+        self.akira_close_hand(arduino)
 
         if not isinstance(servo_name_list, list):
             servo_name_list = [servo_name_list]
@@ -377,11 +475,11 @@ class MotionController:
         for servo_name in servo_name_list:
             if servo_name in self.finger_servos:
                 servo_index, servo_rest, servo_min, servo_max, servo_current = self.get_servo_positions(servo_name=servo_name, arduino=arduino)
-                self.send_command(servo_index, servo_rest, arduino, servo_name, verbose=verbose)
+                self.send_command(servo_index, servo_rest, arduino, servo_name)
         self.hand_status = "OtherUp"
         assert self.hand_status in list(self.hand_status_options.keys())
 
-    def akira_move_hands_randomly(self, only_wrist=False, verbose=False):
+    def akira_move_hands_randomly(self, only_wrist=False):
         while self.move_hands_randomly:
             choice = random.choice(["left", "right", "both"])
             if choice == "both":
@@ -394,12 +492,12 @@ class MotionController:
                 wrist_index, wrist_rest, wrist_min, wrist_max, wrist_current = self.get_servo_positions(servo_name=wrist_name, arduino=arduino)
                 wrist_angle = np.random.normal(loc = wrist_rest, scale = wrist_max - wrist_rest)
                 wrist_angle = int(max(wrist_min, min(wrist_max, wrist_angle)))
-                self.send_command(wrist_index, wrist_angle, arduino, wrist_name, verbose=verbose)
+                self.send_command(wrist_index, wrist_angle, arduino, wrist_name)
 
                 if not only_wrist:
                     finger_action = random.choice(list(self.hand_status_options.keys()))
                     if finger_action != "OtherUp":
-                        self.hand_status_options[finger_action](arduino, verbose)                
+                        self.hand_status_options[finger_action](arduino)                
             
             time.sleep(random.uniform(3, 7))
 
@@ -421,7 +519,7 @@ class MotionController:
 
         return shoulder_data
 
-    def akira_move_arms_randomly(self, verbose=False):
+    def akira_move_arms_randomly(self):
         while self.move_arms_randomly:
             choice = random.choice(["left", "right", "both"])
             if choice == "both":
@@ -449,10 +547,10 @@ class MotionController:
                     rotate_current += (rotate_target - rotate_current) / steps
                     bicep_current += (bicep_target - bicep_current) / steps
 
-                    self.send_command(shoulder_index, int(shoulder_current), arduino, shoulder_name, verbose=verbose)
-                    self.send_command(omoplate_index, int(omoplate_current), arduino, omoplate_name, verbose=verbose)
-                    self.send_command(rotate_index, int(rotate_current), arduino, rotate_name, verbose=verbose)
-                    self.send_command(bicep_index, int(bicep_current), arduino, bicep_name, verbose=verbose)
+                    self.send_command(shoulder_index, int(shoulder_current), arduino, shoulder_name)
+                    self.send_command(omoplate_index, int(omoplate_current), arduino, omoplate_name)
+                    self.send_command(rotate_index, int(rotate_current), arduino, rotate_name)
+                    self.send_command(bicep_index, int(bicep_current), arduino, bicep_name)
 
                     time.sleep(0.1)
 
@@ -464,40 +562,40 @@ class MotionController:
     def stop_move_arms_randomly(self):
         self.move_arms_randomly = False
 
-    def all_rest(self, verbose=False):
+    def all_rest(self):
         print(">>Setting all servos to their rest positions!")
         for arduino in ["left", "right"]:
             if arduino == "left":
                 for servo_name in self.left_servos_list:
                     servo_index, servo_rest, servo_min, servo_max, servo_current = self.get_servo_positions(servo_name=servo_name, arduino=arduino)
-                    self.send_command(servo_index, servo_rest, arduino, servo_name, verbose=verbose)
+                    self.send_command(servo_index, servo_rest, arduino, servo_name)
                     time.sleep(0.1)
             if arduino == "right":
                 for servo_name in self.right_servos_list:
                     servo_index, servo_rest, servo_min, servo_max, servo_current = self.get_servo_positions(servo_name=servo_name, arduino=arduino)
-                    self.send_command(servo_index, servo_rest, arduino, servo_name, verbose=verbose)
+                    self.send_command(servo_index, servo_rest, arduino, servo_name)
                     time.sleep(0.1)
                     
-    def arms_rest(self, verbose=False):
+    def arms_rest(self):
         print(">>Setting all servos to their rest positions!")
         for arduino in ["left", "right"]:
             for servo_name in self.shoulder_servos :
                 servo_index, servo_rest, servo_min, servo_max, servo_current = self.get_servo_positions(servo_name=servo_name, arduino=arduino)
-                self.send_command(servo_index, servo_rest, arduino, servo_name, verbose=verbose)
+                self.send_command(servo_index, servo_rest, arduino, servo_name)
                 time.sleep(0.1)
 
-    def neck_rest(self, verbose=False):
+    def neck_rest(self):
         print(">>Setting all servos to their rest positions!")
         arduino = "left"
         for servo_name in self.neck_servos :
             servo_index, servo_rest, servo_min, servo_max, servo_current = self.get_servo_positions(servo_name=servo_name, arduino=arduino)
-            self.send_command(servo_index, servo_rest, arduino, servo_name, verbose=verbose)
+            self.send_command(servo_index, servo_rest, arduino, servo_name)
             time.sleep(0.1)
 
-    def test_any_servo_like_in_serial(self, servo_name, arduino, desired_position, verbose=True):
+    def test_any_servo_like_in_serial(self, servo_name, arduino, desired_position):
         servo_index, servo_rest, servo_min, servo_max, servo_current = self.get_servo_positions(servo_name=servo_name, arduino=arduino)
         desired_position = int(max(servo_min, min(servo_max, desired_position)))
-        self.send_command(servo_index, desired_position, arduino, servo_name, verbose=verbose)
+        self.send_command(servo_index, desired_position, arduino, servo_name)
 
     def plot_shoulder_positions(self):      
         fig, (ax_left, ax_right) = plt.subplots(2, 1, figsize=(6, 8))
@@ -557,52 +655,72 @@ class MotionController:
 
 if __name__ == "__main__":
     try:
-        mc = MotionController(initialize_on_start=True)
-        mc.move_jaw_and_play(plot_debug=True)
+        mc = MotionController(initialize_on_start=True, verbose=True)
+        #mc.move_jaw_and_play(plot_debug=True)
+    
+    
+        #mc.akira_close_eyes()
+        #time.sleep(5)
+        #mc.akira_open_eyes()
+        #mc.start_move_head_randomly()
+        #head_thread = threading.Thread(target=mc.akira_move_head_randomly)
+        #head_thread.start()
+
+        #mc.plot_shoulder_positions()
+    
+        while True:
+            command = input("Command: ")
+            if command == "e":
+                break
+            elif command == "close hands":
+                mc.akira_close_hand("left")
+                mc.akira_close_hand("right")
+            elif command == "open hands":
+                mc.akira_open_hand("left")
+                mc.akira_open_hand("right")
+            elif command == "ok":
+                mc.akira_thumbs_up("left")
+                mc.akira_thumbs_up("right")
+            elif command == "point":
+                mc.akira_index_up("left")
+                mc.akira_index_up("right")
+            elif command == "half open":
+                mc.akira_half_close_hand("left")
+                mc.akira_half_close_hand("right")
+            elif command == "open eyes":
+                mc.akira_open_eyes()
+            elif command == "close eyes":
+                mc.akira_close_eyes()
+            elif command == "random_hands":
+                mc.akira_move_hands_randomly()
+            elif command == "individual testing":
+                while True:
+                    user_input = input("Move servo: ")
+                    if user_input == "e":
+                        break
+                    servo_name, arduino, desired_position = tuple(user_input.strip().split())
+                    desired_position = int(desired_position)
+                    mc.test_any_servo_like_in_serial(servo_name, arduino, desired_position)
+
+            elif command == "random arm":
+                mc.akira_move_arms_randomly()
+            elif command == "talk":
+                mc.move_jaw_and_play(plot_debug=True)
+            elif command == "blink":
+                proceed = True
+                y = 0
+                while proceed:
+                    mc.akira_blink()
+                    if y == 5:
+                        proceed = False
+                        break
+                    time.sleep(random.uniform(3, 6))
+                    y += 1
+            else:
+                print("Wrong command!")
+
     finally:
         mc.close_connection()
-    
-    #mc.akira_close_eyes()
-    #time.sleep(5)
-    #mc.akira_open_eyes()
-    #mc.start_move_head_randomly()
-    #head_thread = threading.Thread(target=mc.akira_move_head_randomly)
-    #head_thread.start()
-
-    #mc.plot_shoulder_positions()
-    
-##    while True:
-##        command = input("Command: ")
-##        if command == "e":
-##            break
-##        elif command == "close hands":
-##            mc.akira_close_hand("left", True)
-##            mc.akira_close_hand("right", True)
-##        elif command == "open hands":
-##            mc.akira_open_hand("left", True)
-##            mc.akira_open_hand("right", True)
-##        elif command == "ok":
-##            mc.akira_thumbs_up("left", True)
-##            mc.akira_thumbs_up("right", True)
-##        elif command == "point":
-##            mc.akira_index_up("left", True)
-##            mc.akira_index_up("right", True)
-##        elif command == "half open":
-##            mc.akira_half_close_hand("left", True)
-##            mc.akira_half_close_hand("right", True)
-##        elif command == "random_hands":
-##            mc.akira_move_hands_randomly(True)
-##        elif command == "individual testing":
-##            while True:
-##                user_input = input("Move servo: ")
-##                if user_input == "e":
-##                    break
-##                servo_name, arduino, desired_position = tuple(user_input.strip().split())
-##                desired_position = int(desired_position)
-##                mc.test_any_servo_like_in_serial(servo_name, arduino, desired_position)
-##
-##        elif command == "random arm":
-##            mc.akira_move_arms_randomly(True)
             
             
             
