@@ -357,10 +357,10 @@ class Akira_See:
 # --- Main execution block ---
 if __name__ == "__main__":
     akira_vision = Akira_See()
-    #akira_vision.look_at_face(camera_index=0, exit_when_centered=False)
+    akira_vision.look_at_face(camera_index=0, exit_when_centered=True)
     
-    for _ in range(3):
-        print(akira_vision.describe_what_akira_sees(akira_vision.take_photo()))
-        time.sleep(5)
+##    for _ in range(3):
+##        print(akira_vision.describe_what_akira_sees(akira_vision.take_photo()))
+##        time.sleep(5)
     
     
