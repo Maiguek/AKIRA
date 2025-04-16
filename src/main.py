@@ -9,6 +9,7 @@ from perception.vision import Akira_See
 from cognition.dialogue_manager import Akira_Chat
 from action.speech_synthesis import Akira_Talk
 from action.motion_controller import MotionController
+from action.music_manager import MusicPlayer
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "action"))
 
@@ -78,6 +79,8 @@ def main():
 
     akira_vision = Akira_See(motion_controller=mc)
 
+    music_player = MusicPlayer()
+
     blinking_thread = start_blinking(mc)
     moving_hands_rand_thread = start_moving_hands_rand(mc)
     moving_arms_rand_thread = start_moving_arms_rand(mc)
@@ -97,7 +100,6 @@ def main():
             if user_input:
                 # Akira asks for confirmation: or says something by default
                 print("User:", user_input)
-                #if user_input.strip().replace(" ", "").lower() == "exit":
                 if "exit" in user_input.lower():
                     break
 
@@ -107,11 +109,13 @@ def main():
                 # Akira will appear to be thinking while we generate an answer
                 stop_blinking(mc, blinking_thread)
                 #stop_looking_at(akira_vision, looking_at_thread)
+                music_player.play_music()
                 mc.akira_close_eyes()
                 mc.akira_close_hand(arduino="left")
                 mc.akira_index_up(arduino="right")
                 moving_hands_rand_thread = start_moving_hands_rand(mc, only_wrist=True)
                 moving_arms_rand_thread = start_moving_arms_rand(mc)
+                moving_head_rand_thread = start_moving_head_rand(mc)
 
                 # Get a description ow fhat is happening
                 description = akira_vision.describe_what_akira_sees(
@@ -123,17 +127,23 @@ def main():
                 response = chat.generate_response(user_input, description) # generates text to speak
                 print("Akira:", response)
                 voice.speak(response) # clones the voice
+
+                music_player.stop_music()
                 
                 # Akira stops thinking mode
                 mc.akira_open_eyes()
                 blinking_thread = start_blinking(mc)
-                moving_head_rand_thread = start_moving_head_rand(mc)
                 mc.akira_half_close_hand("left")
                 mc.akira_half_close_hand("right")
                 
                 mc.move_jaw_and_play(akira_voice_file) # reproduces audio and moves jaw
 
     finally:
+        try:
+            music_player.stop_music()
+        except Exception as e:
+            print(e)
+            
         voice.speak("Thanks for talking with me, see you next time.")
         mc.move_jaw_and_play(akira_voice_file)
         print("Stopping background threads...")
@@ -167,4 +177,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+    
     
