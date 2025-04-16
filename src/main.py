@@ -79,67 +79,63 @@ def main():
     akira_vision = Akira_See(motion_controller=mc)
 
     blinking_thread = start_blinking(mc)
+    moving_hands_rand_thread = start_moving_hands_rand(mc)
+    moving_arms_rand_thread = start_moving_arms_rand(mc)
+    moving_head_rand_thread = start_moving_head_rand(mc)
  
     try:
         while True:
-            program_input = input(">>> Write 'start' to begin a new conversation, or 'stop' to stop the program: ")
+            # Pay attention mode
+            stop_moving_head_rand(mc, moving_head_rand_thread)
+            mc.neck_rest()
+            stop_moving_hands_rand(mc, moving_hands_rand_thread)
+            stop_moving_arms_rand(mc, moving_arms_rand_thread)
+            mc.arms_rest()
+            #looking_at_thread = start_looking_at(akira_vision)
             
-            moving_hands_rand_thread = start_moving_hands_rand(mc)
-            moving_arms_rand_thread = start_moving_arms_rand(mc)
-            moving_head_rand_thread = start_moving_head_rand(mc)
-            
-            if program_input == "start":
-                while True:
-                    # Pay attention mode
-                    mc.neck_rest()
-                    stop_moving_hands_rand(mc, moving_hands_rand_thread)
-                    stop_moving_arms_rand(mc, moving_arms_rand_thread)
-                    mc.arms_rest()
-                    #looking_at_thread = start_looking_at(akira_vision)
-                    
-                    user_input = listener.recognize_speech()
-                    if user_input:
-                        print("User:", user_input)
-                        if user_input.strip().replace(" ", "").lower() == "exit":
-                            break
+            user_input = listener.recognize_speech()
+            if user_input:
+                # Akira asks for confirmation: or says something by default
+                print("User:", user_input)
+                #if user_input.strip().replace(" ", "").lower() == "exit":
+                if "exit" in user_input.lower():
+                    break
 
-                        # Take a photo of what is happening
-                        image_input = akira_vision.take_photo()
+                # Take a photo of what is happening
+                image_input = akira_vision.take_photo()
 
-                        # Akira will appear to be thinking while we generate an answer
-                        stop_blinking(mc, blinking_thread)
-                        #stop_looking_at(akira_vision, looking_at_thread)
-                        mc.akira_close_eyes()
-                        mc.akira_close_hand(arduino="left")
-                        mc.akira_index_up(arduino="right")
-                        moving_hands_rand_thread = start_moving_hands_rand(mc, only_wrist=True)
-                        moving_arms_rand_thread = start_moving_arms_rand(mc)
+                # Akira will appear to be thinking while we generate an answer
+                stop_blinking(mc, blinking_thread)
+                #stop_looking_at(akira_vision, looking_at_thread)
+                mc.akira_close_eyes()
+                mc.akira_close_hand(arduino="left")
+                mc.akira_index_up(arduino="right")
+                moving_hands_rand_thread = start_moving_hands_rand(mc, only_wrist=True)
+                moving_arms_rand_thread = start_moving_arms_rand(mc)
 
-                        # Get a description ow fhat is happening
-                        description = akira_vision.describe_what_akira_sees(
-                            image_input=image_input,
-                            eliminate_photo=False,
-                            annotate_photo=True
-                            )
+                # Get a description ow fhat is happening
+                description = akira_vision.describe_what_akira_sees(
+                    image_input=image_input,
+                    eliminate_photo=False,
+                    annotate_photo=True
+                    )
 
-                        response = chat.generate_response(user_input, description) # generates text to speak
-                        print("Akira:", response)
-                        voice.speak(response) # clones the voice
-                        
-                        # Akira stops thinking mode
-                        mc.akira_open_eyes()
-                        blinking_thread = start_blinking(mc)
-                        mc.akira_half_close_hand("left")
-                        mc.akira_half_close_hand("right")
-                        
-                        mc.move_jaw_and_play(akira_voice_file) # reproduces audio and moves jaw
-                        
-            elif program_input == "stop":
-                break
-            else:
-                print(f"{program_input} is not valid! Please try either 'start' or 'stop'.")
+                response = chat.generate_response(user_input, description) # generates text to speak
+                print("Akira:", response)
+                voice.speak(response) # clones the voice
+                
+                # Akira stops thinking mode
+                mc.akira_open_eyes()
+                blinking_thread = start_blinking(mc)
+                moving_head_rand_thread = start_moving_head_rand(mc)
+                mc.akira_half_close_hand("left")
+                mc.akira_half_close_hand("right")
+                
+                mc.move_jaw_and_play(akira_voice_file) # reproduces audio and moves jaw
 
     finally:
+        voice.speak("Thanks for talking with me, see you next time.")
+        mc.move_jaw_and_play(akira_voice_file)
         print("Stopping background threads...")
 
         # add for putting all servos in their rest positions before closing connection
@@ -147,10 +143,23 @@ def main():
             stop_looking_at(akira_vision, looking_at_thread)
         except Exception as e:
             print(e)
-        stop_moving_arms_rand(mc, moving_arms_rand_thread)
-        stop_moving_hands_rand(mc, moving_hands_rand_thread)
-        stop_moving_head_rand(mc, moving_head_rand_thread)
-        stop_blinking(mc, blinking_thread)
+        try:
+            stop_moving_arms_rand(mc, moving_arms_rand_thread)
+        except Exception as e:
+            print(e)
+        try:
+            stop_moving_hands_rand(mc, moving_hands_rand_thread)
+        except Exception as e:
+            print(e)
+        try:
+            stop_moving_head_rand(mc, moving_head_rand_thread)
+        except Exception as e:
+            print(e)
+        try:
+            stop_blinking(mc, blinking_thread)
+        except Exception as e:
+            print(e)
+            
         chat.stop_ollama()
         mc.close_connection()
 

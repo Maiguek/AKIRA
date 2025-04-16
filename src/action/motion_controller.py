@@ -6,8 +6,27 @@ import threading
 import librosa
 import random
 import serial
+import queue
 import time
 import os
+import logging
+
+# Set up logging: logs will be written to 'motion_controller.log' and output to the console.
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+
+# File handler – logs to a file
+fh = logging.FileHandler("motion_controller.log")
+fh.setLevel(logging.DEBUG)
+# Console handler – logs to the console
+ch = logging.StreamHandler()
+ch.setLevel(logging.DEBUG)
+
+formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
+fh.setFormatter(formatter)
+ch.setFormatter(formatter)
+logger.addHandler(fh)
+logger.addHandler(ch)
 
 class MotionController:
     def __init__(
@@ -22,6 +41,7 @@ class MotionController:
         ):
 
         self.verbose = verbose
+        self.logger = logger  # use the module-level logger
 
         current_dir = os.path.dirname(os.path.abspath(__file__))
         left_servos_file = os.path.join(current_dir, left_servos_file)
@@ -36,28 +56,21 @@ class MotionController:
         self.arduinos_connected = False
         self.baud_rate = baud_rate
 
+        self.connection_status = False
+
         if initialize_on_start:
             self.initiate_connection()
 
-        def load_servo_info(left_servos_file, right_servos_file):
-            df_left = pd.read_csv(left_servos_file)
-            df_right = pd.read_csv(right_servos_file)
+        self.left_command_queue = queue.Queue()
+        self.right_command_queue = queue.Queue()
+        
+        self.left_worker_thread = threading.Thread(target=self.process_queue, args=("left",), daemon=True)
+        self.right_worker_thread = threading.Thread(target=self.process_queue, args=("right",), daemon=True)
+        self.left_worker_thread.start()
+        self.right_worker_thread.start()
+        
 
-            left_servos_list = df_left.to_dict(orient="records")
-            right_servos_list = df_right.to_dict(orient="records")
-
-            for index in range(len(left_servos_list)):
-                left_servos_list[index]["index"] = index
-                left_servos_list[index]["current"] = left_servos_list[index]["rest_pos"]
-            left_servos_list = {left_servos_list[index]["name"]:left_servos_list[index] for index in range(len(left_servos_list))}
-            for index in range(len(right_servos_list)):
-                right_servos_list[index]["index"] = index
-                right_servos_list[index]["current"] = right_servos_list[index]["rest_pos"]
-            right_servos_list = {right_servos_list[index]["name"]:right_servos_list[index] for index in range(len(right_servos_list))}
-
-            return left_servos_list, right_servos_list
-
-        self.left_servos_list, self.right_servos_list = load_servo_info(left_servos_file, right_servos_file)
+        self.left_servos_list, self.right_servos_list = self.load_servo_info(left_servos_file, right_servos_file)
         self.num_left_servos = len(self.left_servos_list)
         self.num_right_servos = len(self.right_servos_list)
 
@@ -75,12 +88,12 @@ class MotionController:
         self.move_arms_randomly = True
         
         self.hand_status_options = {
-            "Open":self.akira_open_hand,
-            "Close":self.akira_close_hand,
-            "HalfClose":self.akira_half_close_hand,
-            "IndexUp":self.akira_index_up,
-            "ThumbsUp":self.akira_thumbs_up,
-            "OtherUp":self.akira_raise_finger
+            "Open": self.akira_open_hand,
+            "Close": self.akira_close_hand,
+            "HalfClose": self.akira_half_close_hand,
+            "IndexUp": self.akira_index_up,
+            "ThumbsUp": self.akira_thumbs_up,
+            "OtherUp": self.akira_raise_finger
             }
         self.hand_status = "Open"
 
@@ -97,13 +110,145 @@ class MotionController:
         # Length of the time window (in seconds)
         self.window_duration = 1.0
 
+    def process_queue_slow(self, arduino):
+        q = self.left_command_queue if arduino == "left" else self.right_command_queue
+        while self.connection_status:
+            try:
+                command = q.get(timeout=1)
+            except queue.Empty:
+                continue
+            if command is None:
+                q.task_done()
+                break
+
+            servo_index, angle, servo_name = command
+
+            if arduino == "left":
+                with self.lock_left:
+                    # Flush input buffer before sending the command
+                    self.arduino_left.reset_input_buffer()
+                    self.arduino_left.write(f"{servo_index} {angle}\n".encode())
+                    # Wait a short period to allow Arduino to respond
+                    time.sleep(0.05)
+                    # Poll for a valid response
+                    timeout = time.time() + 1.0  # wait up to one second
+                    response = ""
+                    while time.time() < timeout:
+                        if self.arduino_left.in_waiting:
+                            response = self.arduino_left.readline().decode().strip()
+                            if response.strip().upper() == "OK":
+                                break
+                        else:
+                            time.sleep(0.01)
+            else:
+                with self.lock_right:
+                    self.arduino_right.reset_input_buffer()
+                    self.arduino_right.write(f"{servo_index} {angle}\n".encode())
+                    time.sleep(0.05)
+                    timeout = time.time() + 1.0
+                    response = ""
+                    while time.time() < timeout:
+                        if self.arduino_right.in_waiting:
+                            response = self.arduino_right.readline().decode().strip()
+                            if response.strip().upper() == "OK":
+                                break
+                        else:
+                            time.sleep(0.01)
+
+            self.logger.info(f"{arduino} command for {servo_name} sent with angle {angle}. Response: {response}")
+
+            if response.strip().upper() != "OK":
+                self.logger.warning(f"{arduino} command for {servo_name} did not receive an OK response.")
+                # Optionally, re-enqueue the command for a retry
+
+            q.task_done()
+
+    def process_queue(self, arduino):
+        """Worker thread for processing the command queue for the given Arduino."""
+        q = self.left_command_queue if arduino == "left" else self.right_command_queue
+        while self.connection_status:
+            try:
+                command = q.get(timeout=1)
+            except queue.Empty:
+                continue  # Try again to check connection_status
+            
+            if command is None:
+                # Received sentinel value; break out of the loop.
+                q.task_done()
+                break
+
+            servo_index, angle, servo_name = command
+
+            # Send the command while ensuring only one thread is writing to the serial port
+            if arduino == "left":
+                with self.lock_left:
+                    self.arduino_left.write(f"{servo_index} {angle}\n".encode())
+                    response = self.arduino_left.readline().decode().strip()
+            else:
+                with self.lock_right:
+                    self.arduino_right.write(f"{servo_index} {angle}\n".encode())
+                    response = self.arduino_right.readline().decode().strip()
+
+            self.logger.info(f"{arduino} command for {servo_name} sent with angle {angle}. Response: {response}")
+
+            #if response != "OK":
+            #    self.logger.warning(f"{arduino} command for {servo_name} did not receive an OK response.")
+                # Optionally: re-enqueue command here if desired
+            q.task_done()
+
+
+    def send_command(self, servo_index, angle, arduino, servo_name):
+        """
+        Instead of immediately writing to the serial port,
+        this method enqueues the command for processing.
+        """
+        if not self.connection_status:
+            self.logger.warning(f"Connection status: {self.connection_status}")
+            return
+
+        sevo_index, _, min_pos, max_pos, _ = self.get_servo_positions(servo_name, arduino)
+
+        if angle < min_pos:
+            angle = min_pos
+        elif angle > max_pos:
+            angle = max_pos
+        if not isinstance(angle, int):
+            angle = int(angle)
+
+        # Build the command tuple
+        command = (servo_index, angle, servo_name)
+        if arduino == "left":
+            self.left_command_queue.put(command)
+        elif arduino == "right":
+            self.right_command_queue.put(command)
+        else:
+            self.logger.error(f"{arduino} arduino does not exist. Please try either 'left' or 'right'!")
+
+    def load_servo_info(self, left_servos_file, right_servos_file):
+            df_left = pd.read_csv(left_servos_file)
+            df_right = pd.read_csv(right_servos_file)
+
+            left_servos_list = df_left.to_dict(orient="records")
+            right_servos_list = df_right.to_dict(orient="records")
+
+            for index in range(len(left_servos_list)):
+                left_servos_list[index]["index"] = index
+                left_servos_list[index]["current"] = left_servos_list[index]["rest_pos"]
+            left_servos_list = {left_servos_list[index]["name"]: left_servos_list[index] for index in range(len(left_servos_list))}
+            for index in range(len(right_servos_list)):
+                right_servos_list[index]["index"] = index
+                right_servos_list[index]["current"] = right_servos_list[index]["rest_pos"]
+            right_servos_list = {right_servos_list[index]["name"]: right_servos_list[index] for index in range(len(right_servos_list))}
+
+            return left_servos_list, right_servos_list
+
         
     def initiate_connection(self):
-        self.arduino_left = serial.Serial(self.left_port , self.baud_rate, timeout=1)
+        self.arduino_left = serial.Serial(self.left_port, self.baud_rate, timeout=1)
         self.arduino_right = serial.Serial(self.right_port, self.baud_rate, timeout=1)
-
         time.sleep(2)  # Give them time to initialize
-        print("Connection has been successfully initiated!")
+
+        self.logger.info("Connection has been successfully initiated!")
         self.connection_status = True
 
     def close_connection(self):
@@ -111,12 +256,21 @@ class MotionController:
             time.sleep(5)
             self.all_rest()
             time.sleep(15)
+
+            # Insert sentinel values into each queue so the workers can exit their loop.
+            self.left_command_queue.put(None)
+            self.right_command_queue.put(None)
+
+            # Optionally wait for the queues to clear and join the threads.
+            self.left_worker_thread.join(timeout=2)
+            self.right_worker_thread.join(timeout=2)
+            
             self.arduino_left.close()
             self.arduino_right.close()
-            print("Connection has been successfully closed!")
+            self.logger.info("Connection has been successfully closed!")
             self.connection_status = False
         else:
-            print("Connection has not been initiated!")
+            self.logger.warning("Connection has not been initiated!")
 
     def get_servo_positions(self, servo_name, arduino):
         if arduino == "left":
@@ -124,7 +278,7 @@ class MotionController:
         elif arduino == "right":
             servo_list = self.right_servos_list
         else:
-            print(f"There is no {arduino} arduino. Please try either 'left' or 'right'.")
+            self.logger.error(f"There is no {arduino} arduino. Please try either 'left' or 'right'.")
             return None
         try:
             min_pos = servo_list[servo_name]["min_pos"]
@@ -136,7 +290,7 @@ class MotionController:
             return servo_index, rest_pos, min_pos, max_pos, servo_current
         
         except Exception as e:
-            print("We have an exception:", e)
+            self.logger.exception("We have an exception: %s", e)
             return None
 
     def set_current_pos_servo(self, servo_name, arduino, angle):
@@ -145,61 +299,54 @@ class MotionController:
         elif arduino == "right":
             self.right_servos_list[servo_name]["current"] = angle
 
-    def send_command(self, servo_index, angle, arduino, servo_name):
+    def send_command_before(self, servo_index, angle, arduino, servo_name):
         if not self.connection_status:
-            print(f"Connection status: {self.connection_status}")
+            self.logger.warning(f"Connection status: {self.connection_status}")
             return
         
-        # Determine current time and select the appropriate counter
         now = time.time()
         if arduino not in self.command_counters:
-            print(f"{arduino} arduino does not exist. Please try either 'left' or 'right'!")
+            self.logger.error(f"{arduino} arduino does not exist. Please try either 'left' or 'right'!")
             return
 
-        # Check if the current time window has expired, if so reset the counter
         if now - self.command_counters[arduino]["window_start"] >= self.window_duration:
             self.command_counters[arduino]["window_start"] = now
             self.command_counters[arduino]["count"] = 0
 
-        # If the count exceeds our maximum allowed, wait for the window to reset
         if self.command_counters[arduino]["count"] >= self.max_commands:
             wait_time = max(0, self.window_duration - (now - self.command_counters[arduino]["window_start"]))
             if self.verbose:
-                print(f"Throttling: Too many commands for {arduino} Arduino. Sleeping for {wait_time:.2f} seconds.")
+                self.logger.info(f"Throttling: Too many commands for {arduino} Arduino. Sleeping for {wait_time:.2f} seconds.")
             time.sleep(wait_time)
-            # After sleeping, reset the counter and window start time
             self.command_counters[arduino]["window_start"] = time.time()
             self.command_counters[arduino]["count"] = 0
 
-        # Now increment the counter for this command
         self.command_counters[arduino]["count"] += 1
 
-        # Proceed with the rest of your existing send_command logic
         if arduino == "left":
             if isinstance(servo_index, int) and 0 < servo_index < self.num_left_servos:
                 if isinstance(angle, int) and 0 <= angle <= 180:
                     if self.verbose:
-                        print(f">>Moving {servo_name} ({servo_index}) to {angle} on arduino {arduino}.")
+                        self.logger.info(f">>Moving {servo_name} ({servo_index}) to {angle} on arduino {arduino}.")
                     with self.lock_left:
                         self.arduino_left.write(f"{servo_index} {angle}\n".encode())
                         if self.verbose:
                             response = self.arduino_left.readline().decode().strip()
-                            print("Left arduino response:", response)
+                            self.logger.info("Left arduino response: %s", response)
                     self.left_servos_list[servo_name]["current"] = angle
         elif arduino == "right":
             if isinstance(servo_index, int) and 0 < servo_index < self.num_right_servos:
                 if isinstance(angle, int) and 0 <= angle <= 180:
                     if self.verbose:
-                        print(f">>Moving {servo_name} ({servo_index}) to {angle} on arduino {arduino}.")
+                        self.logger.info(f">>Moving {servo_name} ({servo_index}) to {angle} on arduino {arduino}.")
                     with self.lock_right:
                         self.arduino_right.write(f"{servo_index} {angle}\n".encode())
                         if self.verbose:
                             response = self.arduino_right.readline().decode().strip()
-                            print("Right arduino response:", response)
+                            self.logger.info("Right arduino response: %s", response)
                     self.right_servos_list[servo_name]["current"] = angle
         else:
-            print(f"{arduino} arduino does not exist. Please try either 'left' or 'right'!")
-
+            self.logger.error(f"{arduino} arduino does not exist. Please try either 'left' or 'right'!")
 
     def send_command_old(self, servo_index, angle, arduino, servo_name, verbose=False):
         if self.connection_status:
@@ -207,28 +354,28 @@ class MotionController:
                 if isinstance(servo_index, int) and servo_index > 0 and servo_index < self.num_left_servos:
                     if isinstance(angle, int) and angle >= 0 and angle <= 180:
                         if verbose:
-                            print(f">>Moving {servo_name} ({servo_index}) to {angle} on arduino {arduino}.")
+                            self.logger.info(f">>Moving {servo_name} ({servo_index}) to {angle} on arduino {arduino}.")
                         with self.lock_left:
                             self.arduino_left.write(f"{servo_index} {angle}\n".encode())
                             if verbose:
                                 response = self.arduino_left.readline().decode().strip()
-                                print("Left arduino response:", response)
+                                self.logger.info("Left arduino response: %s", response)
                         self.left_servos_list[servo_name]["current"] = angle
             elif arduino == "right":
                 if isinstance(servo_index, int) and servo_index > 0 and servo_index < self.num_right_servos:
                     if isinstance(angle, int) and angle >= 0 and angle <= 180:
                         if verbose:
-                            print(f">>Moving {servo_name} ({servo_index}) to {angle} on arduino {arduino}.")
+                            self.logger.info(f">>Moving {servo_name} ({servo_index}) to {angle} on arduino {arduino}.")
                         with self.lock_right:
                             self.arduino_right.write(f"{servo_index} {angle}\n".encode())
                             if verbose:
                                 response = self.arduino_right.readline().decode().strip()
-                                print("Right arduino response:", response)
+                                self.logger.info("Right arduino response: %s", response)
                         self.right_servos_list[servo_name]["current"] = angle
             else:
-                print(f"{arduino} arduino does not exist. Please try either 'left' or 'right'!")
+                self.logger.error(f"{arduino} arduino does not exist. Please try either 'left' or 'right'!")
         else:
-            print(f"Connection status: {self.connection_status}")
+            self.logger.warning(f"Connection status: {self.connection_status}")
 
     def akira_open_eyes(self):
         arduino = "left"
@@ -266,7 +413,6 @@ class MotionController:
 
     def akira_move_head_randomly(self):
         arduino = "left"
-
         neck_name, roll_name, rot_name = self.neck_servos
         neck_index, neck_rest, neck_min, neck_max, neck_current = self.get_servo_positions(servo_name=neck_name, arduino=arduino)
         roll_index, roll_rest, roll_min, roll_max, roll_current = self.get_servo_positions(servo_name=roll_name, arduino=arduino)
@@ -277,7 +423,7 @@ class MotionController:
             roll_target = random.randint(roll_min + 5, roll_max - 5)
             rot_target = random.randint(rot_min + 5, rot_max - 5)
             
-            distance = abs(neck_target - neck_rest) # for some reason this distance works very nice :)
+            distance = abs(neck_target - neck_rest)
             step_size = max(5, distance // 10)
 
             for _ in range(10):
@@ -305,27 +451,19 @@ class MotionController:
 
     def move_jaw_and_play(self, audio_file="output.wav", plot_debug=False):
         arduino = "left"
-        
-        # Load audio and compute energy per frame
         y, sr = librosa.load(audio_file, sr=None)
         frame_length = 1024
         hop_length = 512
         energy = np.array([
             sum(abs(y[i:i+frame_length]**2)) for i in range(0, len(y), hop_length)
         ])
-        
-        # Normalize energy to [0, 1]
         norm_energy = (energy - energy.min()) / (energy.max() - energy.min())
-        
-        # Get servo positions for Jaw and Upper Lip
         jaw_name = "Jaw"
         jaw_index, jaw_rest, jaw_min, jaw_max, _ = self.get_servo_positions(jaw_name, arduino)
         upper_name = "Upper_Lip"
         upper_index, upper_rest, upper_min, upper_max, _ = self.get_servo_positions(upper_name, arduino)
-        
-        # Define thresholds for states based on normalized energy
-        threshold_half = 0.05   # below this, mouth is considered closed
-        threshold_full = 0.3  # above this, fully open
+        threshold_half = 0.1
+        threshold_full = 0.3
         
         def determine_state(n_energy):
             if n_energy < threshold_half:
@@ -335,54 +473,41 @@ class MotionController:
             else:
                 return "full"
         
-        # Map states to servo angles (modify as needed)
         state_angles = {
             "closed": {"jaw": jaw_min, "upper": upper_min},
             "half": {"jaw": int((jaw_min + jaw_max) / 2), "upper": int((upper_min + upper_max) / 2)},
             "full": {"jaw": jaw_max, "upper": upper_max}
         }
-        
-        # Calculate frame interval and total duration
         frame_interval = hop_length / sr
-        audio_duration = len(y) / sr  # duration in seconds
-        
-        # Create an event to signal when audio playback has finished
+        audio_duration = len(y) / sr
         audio_finished = threading.Event()
-        current_state = None  # To track the previous state
+        current_state = None
         
         def move_mouth():
             nonlocal current_state
             start_time = time.time()
-            # Loop until the elapsed time exceeds audio duration or the audio finishes
             while (time.time() - start_time) < audio_duration and not audio_finished.is_set():
                 elapsed = time.time() - start_time
-                # Determine which frame should be current based on elapsed time
                 frame_idx = int(elapsed / frame_interval)
                 if frame_idx >= len(norm_energy):
-                    break  # In case rounding creates an index out of bound
-                
+                    break
                 desired_state = determine_state(norm_energy[frame_idx])
-                # Only update if there is a state change
                 if desired_state != current_state:
                     angles = state_angles[desired_state]
                     self.send_command(jaw_index, angles["jaw"], arduino, jaw_name)
                     self.send_command(upper_index, angles["upper"], arduino, upper_name)
                     current_state = desired_state
-                    print(f"Elapsed {elapsed:.2f}s, frame {frame_idx}: Changed state to {desired_state}")
-                # Sleep a short time before checking again
+                    self.logger.info(f"Elapsed {elapsed:.2f}s, frame {frame_idx}: Changed state to {desired_state}")
                 time.sleep(0.005)
-            
-            # Once audio is done, optionally return the mouth to a rest/closed position
             final_state = state_angles["closed"]
             self.send_command(jaw_index, final_state["jaw"], arduino, jaw_name)
             self.send_command(upper_index, final_state["upper"], arduino, upper_name)
-            print("Audio finished, stopping mouth movement.")
+            self.logger.info("Audio finished, stopping mouth movement.")
         
         def play_audio():
             playsound(audio_file)
-            audio_finished.set()  # Signal that the audio playback has finished
+            audio_finished.set()
         
-        # Start both threads concurrently
         jaw_thread = threading.Thread(target=move_mouth)
         audio_thread = threading.Thread(target=play_audio)
         
@@ -393,7 +518,6 @@ class MotionController:
         jaw_thread.join()
         
         if plot_debug:
-            import matplotlib.pyplot as plt
             plt.figure(figsize=(10, 8))
             plt.subplot(4, 1, 1)
             plt.plot(y)
@@ -404,7 +528,6 @@ class MotionController:
             plt.subplot(4, 1, 3)
             plt.plot(norm_energy)
             plt.title("Normalized Energy")
-            # For visualization, convert states into numeric values (0=closed, 1=half, 2=full)
             state_numeric = [0 if determine_state(ne) == "closed" 
                              else 1 if determine_state(ne) == "half" 
                              else 2 for ne in norm_energy]
@@ -416,7 +539,7 @@ class MotionController:
 
     def akira_open_hand(self, arduino):
         if self.verbose:
-            print(f"Opening {arduino} hand.")
+            self.logger.info(f"Opening {arduino} hand.")
         if arduino in ["left", "right"]:
             for servo_name in self.finger_servos:
                 servo_index, servo_rest, servo_min, servo_max, servo_current = self.get_servo_positions(servo_name=servo_name, arduino=arduino)
@@ -424,11 +547,11 @@ class MotionController:
                 self.hand_status = "Open"
                 assert self.hand_status in list(self.hand_status_options.keys())
         else:
-            print(f"{arduino} arduino is not valid! Please try again!")
+            self.logger.error(f"{arduino} arduino is not valid! Please try again!")
 
     def akira_half_close_hand(self, arduino):
         if self.verbose:
-            print(f"Half closing {arduino} hand.")
+            self.logger.info(f"Half closing {arduino} hand.")
         if arduino in ["left", "right"]:
             for servo_name in self.finger_servos:
                 servo_index, servo_rest, servo_min, servo_max, servo_current = self.get_servo_positions(servo_name=servo_name, arduino=arduino)
@@ -436,11 +559,11 @@ class MotionController:
                 self.hand_status = "HalfClose"
                 assert self.hand_status in list(self.hand_status_options.keys())
         else:
-            print(f"{arduino} arduino is not valid! Please try again!")
+            self.logger.error(f"{arduino} arduino is not valid! Please try again!")
 
     def akira_close_hand(self, arduino):
         if self.verbose:
-            print(f"Closing {arduino} hand.")
+            self.logger.info(f"Closing {arduino} hand.")
         if arduino in ["left", "right"]:
             for servo_name in self.finger_servos:
                 servo_index, servo_rest, servo_min, servo_max, servo_current = self.get_servo_positions(servo_name=servo_name, arduino=arduino)
@@ -448,11 +571,10 @@ class MotionController:
                     self.send_command(servo_index, servo_max, arduino, servo_name)
                 elif servo_rest == servo_max:
                     self.send_command(servo_index, servo_min, arduino, servo_name)
-
                 self.hand_status = "Close"
                 assert self.hand_status in list(self.hand_status_options.keys())
         else:
-            print(f"{arduino} arduino is not valid! Please try again!")
+            self.logger.error(f"{arduino} arduino is not valid! Please try again!")
 
     def akira_thumbs_up(self, arduino):
         servo_name = "thumb"
@@ -468,10 +590,8 @@ class MotionController:
         
     def akira_raise_finger(self, servo_name_list, arduino):
         self.akira_close_hand(arduino)
-
         if not isinstance(servo_name_list, list):
             servo_name_list = [servo_name_list]
-            
         for servo_name in servo_name_list:
             if servo_name in self.finger_servos:
                 servo_index, servo_rest, servo_min, servo_max, servo_current = self.get_servo_positions(servo_name=servo_name, arduino=arduino)
@@ -490,7 +610,7 @@ class MotionController:
             for arduino in arduinos_to_move:
                 wrist_name = "wrist"
                 wrist_index, wrist_rest, wrist_min, wrist_max, wrist_current = self.get_servo_positions(servo_name=wrist_name, arduino=arduino)
-                wrist_angle = np.random.normal(loc = wrist_rest, scale = wrist_max - wrist_rest)
+                wrist_angle = np.random.normal(loc=wrist_rest, scale=wrist_max - wrist_rest)
                 wrist_angle = int(max(wrist_min, min(wrist_max, wrist_angle)))
                 self.send_command(wrist_index, wrist_angle, arduino, wrist_name)
 
@@ -509,14 +629,12 @@ class MotionController:
 
     def get_shoulder_servo_data(self, arduino):
         shoulder_data = {}
-
         for servo_name in self.shoulder_servos:
             data = self.get_servo_positions(servo_name=servo_name, arduino=arduino)
             if data is not None:
                 shoulder_data[servo_name] = data
             else:
-                print(f"Warning: Could not retrieve data for {servo_name} on {arduino} side.")
-
+                self.logger.warning(f"Warning: Could not retrieve data for {servo_name} on {arduino} side.")
         return shoulder_data
 
     def akira_move_arms_randomly(self):
@@ -529,7 +647,6 @@ class MotionController:
         
             for arduino in arduinos_to_move:
                 shoulder_name, omoplate_name, rotate_name, bicep_name = self.shoulder_servos
-
                 shoulder_index, shoulder_rest, shoulder_min, shoulder_max, shoulder_current = self.get_servo_positions(servo_name=shoulder_name, arduino=arduino)
                 omoplate_index, omoplate_rest, omoplate_min, omoplate_max, omoplate_current = self.get_servo_positions(servo_name=omoplate_name, arduino=arduino)
                 rotate_index, rotate_rest, rotate_min, rotate_max, rotate_current = self.get_servo_positions(servo_name=rotate_name, arduino=arduino)
@@ -563,7 +680,7 @@ class MotionController:
         self.move_arms_randomly = False
 
     def all_rest(self):
-        print(">>Setting all servos to their rest positions!")
+        self.logger.info(">>Setting all servos to their rest positions!")
         for arduino in ["left", "right"]:
             if arduino == "left":
                 for servo_name in self.left_servos_list:
@@ -577,17 +694,17 @@ class MotionController:
                     time.sleep(0.1)
                     
     def arms_rest(self):
-        print(">>Setting all servos to their rest positions!")
+        self.logger.info(">>Setting all servos to their rest positions!")
         for arduino in ["left", "right"]:
-            for servo_name in self.shoulder_servos :
+            for servo_name in self.shoulder_servos:
                 servo_index, servo_rest, servo_min, servo_max, servo_current = self.get_servo_positions(servo_name=servo_name, arduino=arduino)
                 self.send_command(servo_index, servo_rest, arduino, servo_name)
                 time.sleep(0.1)
 
     def neck_rest(self):
-        print(">>Setting all servos to their rest positions!")
+        self.logger.info(">>Setting all servos to their rest positions!")
         arduino = "left"
-        for servo_name in self.neck_servos :
+        for servo_name in self.neck_servos:
             servo_index, servo_rest, servo_min, servo_max, servo_current = self.get_servo_positions(servo_name=servo_name, arduino=arduino)
             self.send_command(servo_index, servo_rest, arduino, servo_name)
             time.sleep(0.1)
@@ -599,7 +716,7 @@ class MotionController:
 
     def plot_shoulder_positions(self):      
         fig, (ax_left, ax_right) = plt.subplots(2, 1, figsize=(6, 8))
-        x = range(len(self.shoulder_servos))  # e.g. 0,1,2,3 for 4 shoulder servos
+        x = range(len(self.shoulder_servos))
         all_positions = []
         
         for i, servo_name in enumerate(self.shoulder_servos):
@@ -608,14 +725,10 @@ class MotionController:
                 min_pos = servo_info["min_pos"]
                 rest_pos = servo_info["rest_pos"]
                 max_pos = servo_info["max_pos"]
-
-                # Plot three points for the servo at x = i
                 ax_left.scatter([i, i, i], [min_pos, rest_pos, max_pos])
-
-                # Collect for global y-limits
                 all_positions.extend([min_pos, rest_pos, max_pos])
             else:
-                print(f"Warning: '{servo_name}' not in left_servos_list.")
+                self.logger.warning(f"Warning: '{servo_name}' not in left_servos_list.")
 
         ax_left.set_title("Left Shoulder Servos")
         ax_left.set_ylabel("Position")
@@ -628,13 +741,10 @@ class MotionController:
                 min_pos = servo_info["min_pos"]
                 rest_pos = servo_info["rest_pos"]
                 max_pos = servo_info["max_pos"]
-
                 ax_right.scatter([i, i, i], [min_pos, rest_pos, max_pos])
-                
-                # Collect for global y-limits
                 all_positions.extend([min_pos, rest_pos, max_pos])
             else:
-                print(f"Warning: '{servo_name}' not in right_servos_list.")
+                self.logger.warning(f"Warning: '{servo_name}' not in right_servos_list.")
 
         ax_right.set_title("Right Shoulder Servos")
         ax_right.set_ylabel("Position")
@@ -651,22 +761,9 @@ class MotionController:
         plt.tight_layout()
         plt.show()
 
-        
-
 if __name__ == "__main__":
     try:
         mc = MotionController(initialize_on_start=True, verbose=True)
-        #mc.move_jaw_and_play(plot_debug=True)
-    
-    
-        #mc.akira_close_eyes()
-        #time.sleep(5)
-        #mc.akira_open_eyes()
-        #mc.start_move_head_randomly()
-        #head_thread = threading.Thread(target=mc.akira_move_head_randomly)
-        #head_thread.start()
-
-        #mc.plot_shoulder_positions()
     
         while True:
             command = input("Command: ")
@@ -701,7 +798,6 @@ if __name__ == "__main__":
                     servo_name, arduino, desired_position = tuple(user_input.strip().split())
                     desired_position = int(desired_position)
                     mc.test_any_servo_like_in_serial(servo_name, arduino, desired_position)
-
             elif command == "random arm":
                 mc.akira_move_arms_randomly()
             elif command == "talk":
@@ -710,20 +806,15 @@ if __name__ == "__main__":
                 proceed = True
                 y = 0
                 while proceed:
-                    mc.akira_blink()
+                    # Assuming you want to call a blink method here
+                    mc.akira_close_eyes()
+                    mc.akira_open_eyes()
                     if y == 5:
                         proceed = False
                         break
                     time.sleep(random.uniform(3, 6))
                     y += 1
             else:
-                print("Wrong command!")
-
+                logger.info("Wrong command!")
     finally:
         mc.close_connection()
-            
-            
-            
-    
-    
-    

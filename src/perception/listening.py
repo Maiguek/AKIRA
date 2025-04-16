@@ -1,10 +1,17 @@
 import speech_recognition as sr
-import pyaudio
+from faster_whisper import WhisperModel
+import tempfile
+from playsound import playsound
 
 class Akira_Listen():
-    def __init__(self):
+    def __init__(self, recognizer_method="whisper", whisper_model_size="tiny"):
         self.r = sr.Recognizer()
+        self.r.pause_threshold = 5.0
         self.mic_index = 0
+        self.recognizer_method = recognizer_method
+
+        if self.recognizer_method == "whisper":
+            self.whisper_model = WhisperModel(whisper_model_size)
     
     def list_microphones(self):
         """List all available microphones"""
@@ -22,13 +29,13 @@ class Akira_Listen():
                 print(f"Testing microphone (Index: {mic_index}) - Speak now...")
                 self.r.adjust_for_ambient_noise(source)
                 audio = self.r.listen(source, timeout=5)
-                print("Audio captured successfully! Playing back...")
+                print("Audio captured successfully!")
 
-                # Save and play the recorded sound for verification
                 with open("test_audio.wav", "wb") as f:
                     f.write(audio.get_wav_data())
+                print("Playing audio...")
+                playsound("test_audio.wav")
 
-                print("Playback test_audio.wav with any media player to verify.")
         except Exception as e:
             print(f"Error testing microphone: {e}")
 
@@ -38,9 +45,24 @@ class Akira_Listen():
             with sr.Microphone(device_index=self.mic_index) as source:
                 print("Listening...")
                 self.r.adjust_for_ambient_noise(source)
-                audio_text = self.r.listen(source)
+                audio_text = self.r.listen(
+                    source,
+                    timeout=None,
+                    phrase_time_limit=None
+                    )
 
-            return self.r.recognize_google(audio_text)
+            if self.recognizer_method == "google":
+                return self.r.recognize_google(audio_text)
+            elif self.recognizer_method == "whisper":
+                wav_bytes = audio_text.get_wav_data()
+                with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tmp_wav:
+                    tmp_wav.write(wav_bytes)
+                    tmp_wav.flush()
+
+                    segments, info = self.whisper_model.transcribe(tmp_wav.name)
+
+                transcription = " ".join(segment.text for segment in segments)
+                return transcription
         except sr.UnknownValueError:
             print("Could not understand the audio.")
             return None
@@ -53,17 +75,15 @@ class Akira_Listen():
 
 
 if __name__ == "__main__":
-    listener = Akira_Listen()
+    listener = Akira_Listen(
+        recognizer_method="whisper",
+        whisper_model_size="tiny"
+        )
 
-    # Step 1: List available microphones
     listener.list_microphones()
-    
-    # Step 2: Allow user to choose a microphone index
     mic_index = int(input("Enter the index of your microphone: "))
-
-    # Step 3: Test if the microphone is working
+    #listener.test_microphone(mic_index)
     
-    listener.test_microphone(mic_index)
     listener.set_mic_index(mic_index)
 
     # Step 4: Run Speech Recognition

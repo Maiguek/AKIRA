@@ -1,0 +1,618 @@
+2025-04-16 15:58:17,838 - INFO - Connection has been successfully initiated!
+2025-04-16 15:58:31,654 - INFO - Wrong command!
+2025-04-16 15:58:42,780 - INFO - >>Moving Jaw (21) to 80 on arduino left.
+2025-04-16 15:58:42,842 - INFO - Left arduino response: OK 21 80
+2025-04-16 15:58:42,848 - INFO - >>Moving Upper_Lip (5) to 65 on arduino left.
+2025-04-16 15:58:42,871 - INFO - Left arduino response: OK 5 65
+2025-04-16 15:58:42,876 - INFO - Elapsed 0.00s, frame 0: Changed state to closed
+2025-04-16 15:58:43,765 - INFO - >>Moving Jaw (21) to 102 on arduino left.
+2025-04-16 15:58:43,813 - INFO - Left arduino response: OK 21 102
+2025-04-16 15:58:43,819 - INFO - >>Moving Upper_Lip (5) to 82 on arduino left.
+2025-04-16 15:58:43,842 - INFO - Left arduino response: OK 5 82
+2025-04-16 15:58:43,847 - INFO - Elapsed 0.99s, frame 46: Changed state to half
+2025-04-16 15:58:43,894 - INFO - >>Moving Jaw (21) to 80 on arduino left.
+2025-04-16 15:58:43,920 - INFO - Left arduino response: OK 21 80
+2025-04-16 15:58:43,927 - INFO - >>Moving Upper_Lip (5) to 65 on arduino left.
+2025-04-16 15:58:43,948 - INFO - Left arduino response: OK 5 65
+2025-04-16 15:58:43,954 - INFO - Elapsed 1.11s, frame 52: Changed state to closed
+2025-04-16 15:58:44,296 - INFO - >>Moving Jaw (21) to 102 on arduino left.
+2025-04-16 15:58:44,325 - INFO - Left arduino response: OK 21 102
+2025-04-16 15:58:44,332 - INFO - >>Moving Upper_Lip (5) to 82 on arduino left.
+2025-04-16 15:58:44,358 - INFO - Left arduino response: OK 5 82
+2025-04-16 15:58:44,363 - INFO - Elapsed 1.52s, frame 71: Changed state to half
+2025-04-16 15:58:44,374 - INFO - >>Moving Jaw (21) to 80 on arduino left.
+2025-04-16 15:58:44,399 - INFO - Left arduino response: OK 21 80
+2025-04-16 15:58:44,406 - INFO - >>Moving Upper_Lip (5) to 65 on arduino left.
+2025-04-16 15:58:44,428 - INFO - Left arduino response: OK 5 65
+2025-04-16 15:58:44,433 - INFO - Elapsed 1.59s, frame 74: Changed state to closed
+2025-04-16 15:58:45,193 - INFO - >>Moving Jaw (21) to 102 on arduino left.
+2025-04-16 15:58:45,271 - INFO - Left arduino response: OK 21 102
+2025-04-16 15:58:45,278 - INFO - >>Moving Upper_Lip (5) to 82 on arduino left.
+2025-04-16 15:58:45,300 - INFO - Left arduino response: OK 5 82
+2025-04-16 15:58:45,306 - INFO - Elapsed 2.41s, frame 113: Changed state to half
+2025-04-16 15:58:45,317 - INFO - >>Moving Jaw (21) to 80 on arduino left.
+2025-04-16 15:58:45,341 - INFO - Left arduino response: OK 21 80
+2025-04-16 15:58:45,347 - INFO - >>Moving Upper_Lip (5) to 65 on arduino left.
+2025-04-16 15:58:45,370 - INFO - Left arduino response: OK 5 65
+2025-04-16 15:58:45,375 - INFO - Elapsed 2.54s, frame 118: Changed state to closed
+2025-04-16 15:58:45,447 - INFO - >>Moving Jaw (21) to 102 on arduino left.
+2025-04-16 15:58:45,509 - INFO - Left arduino response: OK 21 102
+2025-04-16 15:58:45,515 - INFO - >>Moving Upper_Lip (5) to 82 on arduino left.
+2025-04-16 15:58:45,538 - INFO - Left arduino response: OK 5 82
+2025-04-16 15:58:45,543 - INFO - Elapsed 2.67s, frame 125: Changed state to half
+2025-04-16 15:58:45,553 - INFO - >>Moving Jaw (21) to 80 on arduino left.
+2025-04-16 15:58:45,579 - INFO - Left arduino response: OK 21 80
+2025-04-16 15:58:45,585 - INFO - >>Moving Upper_Lip (5) to 65 on arduino left.
+2025-04-16 15:58:45,607 - INFO - Left arduino response: OK 5 65
+2025-04-16 15:58:45,613 - INFO - Elapsed 2.77s, frame 130: Changed state to closed
+2025-04-16 15:58:45,623 - INFO - >>Moving Jaw (21) to 102 on arduino left.
+2025-04-16 15:58:45,648 - INFO - Left arduino response: OK 21 102
+2025-04-16 15:58:45,655 - INFO - >>Moving Upper_Lip (5) to 82 on arduino left.
+2025-04-16 15:58:45,677 - INFO - Left arduino response: OK 5 82
+2025-04-16 15:58:45,683 - INFO - Elapsed 2.84s, frame 133: Changed state to half
+2025-04-16 15:58:45,706 - INFO - Throttling: Too many commands for left Arduino. Sleeping for 0.49 seconds.
+2025-04-16 15:58:46,200 - INFO - >>Moving Jaw (21) to 80 on arduino left.
+2025-04-16 15:58:46,238 - INFO - Left arduino response: OK 21 80
+2025-04-16 15:58:46,244 - INFO - >>Moving Upper_Lip (5) to 65 on arduino left.
+2025-04-16 15:58:46,267 - INFO - Left arduino response: OK 5 65
+2025-04-16 15:58:46,273 - INFO - Elapsed 2.93s, frame 137: Changed state to closed
+2025-04-16 15:58:46,284 - INFO - >>Moving Jaw (21) to 125 on arduino left.
+2025-04-16 15:58:46,312 - INFO - Left arduino response: OK 21 125
+2025-04-16 15:58:46,317 - INFO - >>Moving Upper_Lip (5) to 99 on arduino left.
+2025-04-16 15:58:46,345 - INFO - Left arduino response: OK 5 99
+2025-04-16 15:58:46,351 - INFO - Elapsed 3.50s, frame 164: Changed state to full
+2025-04-16 15:58:46,364 - INFO - >>Moving Jaw (21) to 102 on arduino left.
+2025-04-16 15:58:46,390 - INFO - Left arduino response: OK 21 102
+2025-04-16 15:58:46,395 - INFO - >>Moving Upper_Lip (5) to 82 on arduino left.
+2025-04-16 15:58:46,418 - INFO - Left arduino response: OK 5 82
+2025-04-16 15:58:46,424 - INFO - Elapsed 3.58s, frame 168: Changed state to half
+2025-04-16 15:58:46,471 - INFO - >>Moving Jaw (21) to 80 on arduino left.
+2025-04-16 15:58:46,496 - INFO - Left arduino response: OK 21 80
+2025-04-16 15:58:46,503 - INFO - >>Moving Upper_Lip (5) to 65 on arduino left.
+2025-04-16 15:58:46,525 - INFO - Left arduino response: OK 5 65
+2025-04-16 15:58:46,530 - INFO - Elapsed 3.69s, frame 173: Changed state to closed
+2025-04-16 15:58:46,542 - INFO - >>Moving Jaw (21) to 102 on arduino left.
+2025-04-16 15:58:46,570 - INFO - Left arduino response: OK 21 102
+2025-04-16 15:58:46,576 - INFO - >>Moving Upper_Lip (5) to 82 on arduino left.
+2025-04-16 15:58:46,599 - INFO - Left arduino response: OK 5 82
+2025-04-16 15:58:46,604 - INFO - Elapsed 3.76s, frame 176: Changed state to half
+2025-04-16 15:58:46,615 - INFO - Throttling: Too many commands for left Arduino. Sleeping for 0.58 seconds.
+2025-04-16 15:58:47,206 - INFO - >>Moving Jaw (21) to 80 on arduino left.
+2025-04-16 15:58:47,246 - INFO - Left arduino response: OK 21 80
+2025-04-16 15:58:47,252 - INFO - >>Moving Upper_Lip (5) to 65 on arduino left.
+2025-04-16 15:58:47,275 - INFO - Left arduino response: OK 5 65
+2025-04-16 15:58:47,280 - INFO - Elapsed 3.84s, frame 179: Changed state to closed
+2025-04-16 15:58:47,388 - INFO - >>Moving Jaw (21) to 102 on arduino left.
+2025-04-16 15:58:47,414 - INFO - Left arduino response: OK 21 102
+2025-04-16 15:58:47,420 - INFO - >>Moving Upper_Lip (5) to 82 on arduino left.
+2025-04-16 15:58:47,443 - INFO - Left arduino response: OK 5 82
+2025-04-16 15:58:47,448 - INFO - Elapsed 4.61s, frame 216: Changed state to half
+2025-04-16 15:58:47,459 - INFO - >>Moving Jaw (21) to 125 on arduino left.
+2025-04-16 15:58:47,484 - INFO - Left arduino response: OK 21 125
+2025-04-16 15:58:47,489 - INFO - >>Moving Upper_Lip (5) to 99 on arduino left.
+2025-04-16 15:58:47,512 - INFO - Left arduino response: OK 5 99
+2025-04-16 15:58:47,518 - INFO - Elapsed 4.68s, frame 219: Changed state to full
+2025-04-16 15:58:47,529 - INFO - >>Moving Jaw (21) to 80 on arduino left.
+2025-04-16 15:58:47,553 - INFO - Left arduino response: OK 21 80
+2025-04-16 15:58:47,559 - INFO - >>Moving Upper_Lip (5) to 65 on arduino left.
+2025-04-16 15:58:47,582 - INFO - Left arduino response: OK 5 65
+2025-04-16 15:58:47,588 - INFO - Elapsed 4.75s, frame 222: Changed state to closed
+2025-04-16 15:58:47,625 - INFO - >>Moving Jaw (21) to 102 on arduino left.
+2025-04-16 15:58:47,652 - INFO - Left arduino response: OK 21 102
+2025-04-16 15:58:47,658 - INFO - >>Moving Upper_Lip (5) to 82 on arduino left.
+2025-04-16 15:58:47,680 - INFO - Left arduino response: OK 5 82
+2025-04-16 15:58:47,686 - INFO - Elapsed 4.85s, frame 227: Changed state to half
+2025-04-16 15:58:47,732 - INFO - Throttling: Too many commands for left Arduino. Sleeping for 0.47 seconds.
+2025-04-16 15:58:48,212 - INFO - >>Moving Jaw (21) to 80 on arduino left.
+2025-04-16 15:58:48,266 - INFO - Left arduino response: OK 21 80
+2025-04-16 15:58:48,273 - INFO - >>Moving Upper_Lip (5) to 65 on arduino left.
+2025-04-16 15:58:48,295 - INFO - Left arduino response: OK 5 65
+2025-04-16 15:58:48,302 - INFO - Elapsed 4.95s, frame 232: Changed state to closed
+2025-04-16 15:58:49,696 - INFO - >>Moving Jaw (21) to 102 on arduino left.
+2025-04-16 15:58:49,741 - INFO - Left arduino response: OK 21 102
+2025-04-16 15:58:49,747 - INFO - >>Moving Upper_Lip (5) to 82 on arduino left.
+2025-04-16 15:58:49,770 - INFO - Left arduino response: OK 5 82
+2025-04-16 15:58:49,776 - INFO - Elapsed 6.92s, frame 324: Changed state to half
+2025-04-16 15:58:49,801 - INFO - >>Moving Jaw (21) to 80 on arduino left.
+2025-04-16 15:58:49,827 - INFO - Left arduino response: OK 21 80
+2025-04-16 15:58:49,833 - INFO - >>Moving Upper_Lip (5) to 65 on arduino left.
+2025-04-16 15:58:49,856 - INFO - Left arduino response: OK 5 65
+2025-04-16 15:58:49,865 - INFO - Elapsed 7.02s, frame 329: Changed state to closed
+2025-04-16 15:58:49,876 - INFO - >>Moving Jaw (21) to 125 on arduino left.
+2025-04-16 15:58:49,905 - INFO - Left arduino response: OK 21 125
+2025-04-16 15:58:49,910 - INFO - >>Moving Upper_Lip (5) to 99 on arduino left.
+2025-04-16 15:58:49,934 - INFO - Left arduino response: OK 5 99
+2025-04-16 15:58:49,941 - INFO - Elapsed 7.10s, frame 332: Changed state to full
+2025-04-16 15:58:50,077 - INFO - >>Moving Jaw (21) to 102 on arduino left.
+2025-04-16 15:58:50,106 - INFO - Left arduino response: OK 21 102
+2025-04-16 15:58:50,111 - INFO - >>Moving Upper_Lip (5) to 82 on arduino left.
+2025-04-16 15:58:50,134 - INFO - Left arduino response: OK 5 82
+2025-04-16 15:58:50,139 - INFO - Elapsed 7.30s, frame 342: Changed state to half
+2025-04-16 15:58:50,149 - INFO - >>Moving Jaw (21) to 80 on arduino left.
+2025-04-16 15:58:50,175 - INFO - Left arduino response: OK 21 80
+2025-04-16 15:58:50,179 - INFO - >>Moving Upper_Lip (5) to 65 on arduino left.
+2025-04-16 15:58:50,204 - INFO - Left arduino response: OK 5 65
+2025-04-16 15:58:50,210 - INFO - Elapsed 7.37s, frame 345: Changed state to closed
+2025-04-16 15:58:50,568 - INFO - Throttling: Too many commands for left Arduino. Sleeping for 0.13 seconds.
+2025-04-16 15:58:50,754 - INFO - >>Moving Jaw (21) to 102 on arduino left.
+2025-04-16 15:58:50,786 - INFO - Left arduino response: OK 21 102
+2025-04-16 15:58:50,792 - INFO - >>Moving Upper_Lip (5) to 82 on arduino left.
+2025-04-16 15:58:50,818 - INFO - Left arduino response: OK 5 82
+2025-04-16 15:58:50,825 - INFO - Elapsed 7.79s, frame 365: Changed state to half
+2025-04-16 15:58:50,951 - INFO - >>Moving Jaw (21) to 125 on arduino left.
+2025-04-16 15:58:50,978 - INFO - Left arduino response: OK 21 125
+2025-04-16 15:58:50,985 - INFO - >>Moving Upper_Lip (5) to 99 on arduino left.
+2025-04-16 15:58:51,007 - INFO - Left arduino response: OK 5 99
+2025-04-16 15:58:51,014 - INFO - Elapsed 8.17s, frame 383: Changed state to full
+2025-04-16 15:58:51,024 - INFO - >>Moving Jaw (21) to 102 on arduino left.
+2025-04-16 15:58:51,052 - INFO - Left arduino response: OK 21 102
+2025-04-16 15:58:51,058 - INFO - >>Moving Upper_Lip (5) to 82 on arduino left.
+2025-04-16 15:58:51,081 - INFO - Left arduino response: OK 5 82
+2025-04-16 15:58:51,087 - INFO - Elapsed 8.24s, frame 386: Changed state to half
+2025-04-16 15:58:51,099 - INFO - >>Moving Jaw (21) to 80 on arduino left.
+2025-04-16 15:58:51,126 - INFO - Left arduino response: OK 21 80
+2025-04-16 15:58:51,132 - INFO - >>Moving Upper_Lip (5) to 65 on arduino left.
+2025-04-16 15:58:51,154 - INFO - Left arduino response: OK 5 65
+2025-04-16 15:58:51,160 - INFO - Elapsed 8.32s, frame 389: Changed state to closed
+2025-04-16 15:58:51,170 - INFO - >>Moving Jaw (21) to 125 on arduino left.
+2025-04-16 15:58:51,195 - INFO - Left arduino response: OK 21 125
+2025-04-16 15:58:51,201 - INFO - >>Moving Upper_Lip (5) to 99 on arduino left.
+2025-04-16 15:58:51,224 - INFO - Left arduino response: OK 5 99
+2025-04-16 15:58:51,230 - INFO - Elapsed 8.39s, frame 393: Changed state to full
+2025-04-16 15:58:51,253 - INFO - Throttling: Too many commands for left Arduino. Sleeping for 0.50 seconds.
+2025-04-16 15:58:51,761 - INFO - >>Moving Jaw (21) to 102 on arduino left.
+2025-04-16 15:58:51,789 - INFO - Left arduino response: OK 21 102
+2025-04-16 15:58:51,796 - INFO - >>Moving Upper_Lip (5) to 82 on arduino left.
+2025-04-16 15:58:51,818 - INFO - Left arduino response: OK 5 82
+2025-04-16 15:58:51,824 - INFO - Elapsed 8.47s, frame 397: Changed state to half
+2025-04-16 15:58:51,894 - INFO - >>Moving Jaw (21) to 80 on arduino left.
+2025-04-16 15:58:51,953 - INFO - Left arduino response: OK 21 80
+2025-04-16 15:58:51,960 - INFO - >>Moving Upper_Lip (5) to 65 on arduino left.
+2025-04-16 15:58:51,986 - INFO - Left arduino response: OK 5 65
+2025-04-16 15:58:51,991 - INFO - Elapsed 9.11s, frame 427: Changed state to closed
+2025-04-16 15:58:52,002 - INFO - >>Moving Jaw (21) to 102 on arduino left.
+2025-04-16 15:58:52,031 - INFO - Left arduino response: OK 21 102
+2025-04-16 15:58:52,038 - INFO - >>Moving Upper_Lip (5) to 82 on arduino left.
+2025-04-16 15:58:52,060 - INFO - Left arduino response: OK 5 82
+2025-04-16 15:58:52,065 - INFO - Elapsed 9.22s, frame 432: Changed state to half
+2025-04-16 15:58:52,076 - INFO - >>Moving Jaw (21) to 125 on arduino left.
+2025-04-16 15:58:52,105 - INFO - Left arduino response: OK 21 125
+2025-04-16 15:58:52,110 - INFO - >>Moving Upper_Lip (5) to 99 on arduino left.
+2025-04-16 15:58:52,133 - INFO - Left arduino response: OK 5 99
+2025-04-16 15:58:52,140 - INFO - Elapsed 9.30s, frame 435: Changed state to full
+2025-04-16 15:58:52,150 - INFO - >>Moving Jaw (21) to 102 on arduino left.
+2025-04-16 15:58:52,179 - INFO - Left arduino response: OK 21 102
+2025-04-16 15:58:52,184 - INFO - >>Moving Upper_Lip (5) to 82 on arduino left.
+2025-04-16 15:58:52,207 - INFO - Left arduino response: OK 5 82
+2025-04-16 15:58:52,213 - INFO - Elapsed 9.37s, frame 439: Changed state to half
+2025-04-16 15:58:52,233 - INFO - Throttling: Too many commands for left Arduino. Sleeping for 0.53 seconds.
+2025-04-16 15:58:52,769 - INFO - >>Moving Jaw (21) to 80 on arduino left.
+2025-04-16 15:58:52,793 - INFO - Left arduino response: OK 21 80
+2025-04-16 15:58:52,800 - INFO - >>Moving Upper_Lip (5) to 65 on arduino left.
+2025-04-16 15:58:52,822 - INFO - Left arduino response: OK 5 65
+2025-04-16 15:58:52,828 - INFO - Elapsed 9.45s, frame 443: Changed state to closed
+2025-04-16 15:58:53,088 - INFO - >>Moving Jaw (21) to 102 on arduino left.
+2025-04-16 15:58:53,162 - INFO - Left arduino response: OK 21 102
+2025-04-16 15:58:53,169 - INFO - >>Moving Upper_Lip (5) to 82 on arduino left.
+2025-04-16 15:58:53,191 - INFO - Left arduino response: OK 5 82
+2025-04-16 15:58:53,197 - INFO - Elapsed 10.31s, frame 483: Changed state to half
+2025-04-16 15:58:53,208 - INFO - >>Moving Jaw (21) to 80 on arduino left.
+2025-04-16 15:58:53,231 - INFO - Left arduino response: OK 21 80
+2025-04-16 15:58:53,237 - INFO - >>Moving Upper_Lip (5) to 65 on arduino left.
+2025-04-16 15:58:53,260 - INFO - Left arduino response: OK 5 65
+2025-04-16 15:58:53,266 - INFO - Elapsed 10.43s, frame 488: Changed state to closed
+2025-04-16 15:58:53,429 - INFO - >>Moving Jaw (21) to 102 on arduino left.
+2025-04-16 15:58:53,498 - INFO - Left arduino response: OK 21 102
+2025-04-16 15:58:53,504 - INFO - >>Moving Upper_Lip (5) to 82 on arduino left.
+2025-04-16 15:58:53,526 - INFO - Left arduino response: OK 5 82
+2025-04-16 15:58:53,532 - INFO - Elapsed 10.65s, frame 499: Changed state to half
+2025-04-16 15:58:53,558 - INFO - >>Moving Jaw (21) to 80 on arduino left.
+2025-04-16 15:58:53,584 - INFO - Left arduino response: OK 21 80
+2025-04-16 15:58:53,590 - INFO - >>Moving Upper_Lip (5) to 65 on arduino left.
+2025-04-16 15:58:53,612 - INFO - Left arduino response: OK 5 65
+2025-04-16 15:58:53,618 - INFO - Elapsed 10.78s, frame 505: Changed state to closed
+2025-04-16 15:58:54,006 - INFO - >>Moving Jaw (21) to 102 on arduino left.
+2025-04-16 15:58:54,051 - INFO - Left arduino response: OK 21 102
+2025-04-16 15:58:54,058 - INFO - >>Moving Upper_Lip (5) to 82 on arduino left.
+2025-04-16 15:58:54,079 - INFO - Left arduino response: OK 5 82
+2025-04-16 15:58:54,085 - INFO - Elapsed 11.23s, frame 526: Changed state to half
+2025-04-16 15:58:54,152 - INFO - >>Moving Jaw (21) to 80 on arduino left.
+2025-04-16 15:58:54,215 - INFO - Left arduino response: OK 21 80
+2025-04-16 15:58:54,221 - INFO - >>Moving Upper_Lip (5) to 65 on arduino left.
+2025-04-16 15:58:54,243 - INFO - Left arduino response: OK 5 65
+2025-04-16 15:58:54,250 - INFO - Elapsed 11.37s, frame 533: Changed state to closed
+2025-04-16 15:58:54,261 - INFO - >>Moving Jaw (21) to 125 on arduino left.
+2025-04-16 15:58:54,288 - INFO - Left arduino response: OK 21 125
+2025-04-16 15:58:54,294 - INFO - >>Moving Upper_Lip (5) to 99 on arduino left.
+2025-04-16 15:58:54,321 - INFO - Left arduino response: OK 5 99
+2025-04-16 15:58:54,327 - INFO - Elapsed 11.48s, frame 538: Changed state to full
+2025-04-16 15:58:54,340 - INFO - >>Moving Jaw (21) to 80 on arduino left.
+2025-04-16 15:58:54,366 - INFO - Left arduino response: OK 21 80
+2025-04-16 15:58:54,373 - INFO - >>Moving Upper_Lip (5) to 65 on arduino left.
+2025-04-16 15:58:54,395 - INFO - Left arduino response: OK 5 65
+2025-04-16 15:58:54,401 - INFO - Elapsed 11.56s, frame 541: Changed state to closed
+2025-04-16 15:58:54,578 - INFO - >>Moving Jaw (21) to 102 on arduino left.
+2025-04-16 15:58:54,637 - INFO - Left arduino response: OK 21 102
+2025-04-16 15:58:54,643 - INFO - >>Moving Upper_Lip (5) to 82 on arduino left.
+2025-04-16 15:58:54,665 - INFO - Left arduino response: OK 5 82
+2025-04-16 15:58:54,671 - INFO - Elapsed 11.80s, frame 553: Changed state to half
+2025-04-16 15:58:54,682 - INFO - Throttling: Too many commands for left Arduino. Sleeping for 0.32 seconds.
+2025-04-16 15:58:55,012 - INFO - >>Moving Jaw (21) to 125 on arduino left.
+2025-04-16 15:58:55,038 - INFO - Left arduino response: OK 21 125
+2025-04-16 15:58:55,046 - INFO - >>Moving Upper_Lip (5) to 99 on arduino left.
+2025-04-16 15:58:55,071 - INFO - Left arduino response: OK 5 99
+2025-04-16 15:58:55,077 - INFO - Elapsed 11.90s, frame 557: Changed state to full
+2025-04-16 15:58:55,087 - INFO - >>Moving Jaw (21) to 80 on arduino left.
+2025-04-16 15:58:55,112 - INFO - Left arduino response: OK 21 80
+2025-04-16 15:58:55,118 - INFO - >>Moving Upper_Lip (5) to 65 on arduino left.
+2025-04-16 15:58:55,140 - INFO - Left arduino response: OK 5 65
+2025-04-16 15:58:55,146 - INFO - Elapsed 12.31s, frame 576: Changed state to closed
+2025-04-16 15:58:55,624 - INFO - >>Moving Jaw (21) to 102 on arduino left.
+2025-04-16 15:58:55,681 - INFO - Left arduino response: OK 21 102
+2025-04-16 15:58:55,688 - INFO - >>Moving Upper_Lip (5) to 82 on arduino left.
+2025-04-16 15:58:55,710 - INFO - Left arduino response: OK 5 82
+2025-04-16 15:58:55,716 - INFO - Elapsed 12.84s, frame 602: Changed state to half
+2025-04-16 15:58:55,753 - INFO - >>Moving Jaw (21) to 80 on arduino left.
+2025-04-16 15:58:55,780 - INFO - Left arduino response: OK 21 80
+2025-04-16 15:58:55,786 - INFO - >>Moving Upper_Lip (5) to 65 on arduino left.
+2025-04-16 15:58:55,808 - INFO - Left arduino response: OK 5 65
+2025-04-16 15:58:55,814 - INFO - Elapsed 12.97s, frame 608: Changed state to closed
+2025-04-16 15:58:55,881 - INFO - >>Moving Jaw (21) to 102 on arduino left.
+2025-04-16 15:58:55,948 - INFO - Left arduino response: OK 21 102
+2025-04-16 15:58:55,954 - INFO - >>Moving Upper_Lip (5) to 82 on arduino left.
+2025-04-16 15:58:55,980 - INFO - Left arduino response: OK 5 82
+2025-04-16 15:58:55,990 - INFO - Elapsed 13.10s, frame 614: Changed state to half
+2025-04-16 15:58:56,000 - INFO - Throttling: Too many commands for left Arduino. Sleeping for 0.01 seconds.
+2025-04-16 15:58:56,020 - INFO - >>Moving Jaw (21) to 80 on arduino left.
+2025-04-16 15:58:56,046 - INFO - Left arduino response: OK 21 80
+2025-04-16 15:58:56,051 - INFO - >>Moving Upper_Lip (5) to 65 on arduino left.
+2025-04-16 15:58:56,074 - INFO - Left arduino response: OK 5 65
+2025-04-16 15:58:56,081 - INFO - Elapsed 13.22s, frame 619: Changed state to closed
+2025-04-16 15:58:56,091 - INFO - >>Moving Jaw (21) to 102 on arduino left.
+2025-04-16 15:58:56,115 - INFO - Left arduino response: OK 21 102
+2025-04-16 15:58:56,121 - INFO - >>Moving Upper_Lip (5) to 82 on arduino left.
+2025-04-16 15:58:56,144 - INFO - Left arduino response: OK 5 82
+2025-04-16 15:58:56,150 - INFO - Elapsed 13.31s, frame 623: Changed state to half
+2025-04-16 15:58:56,162 - INFO - >>Moving Jaw (21) to 80 on arduino left.
+2025-04-16 15:58:56,185 - INFO - Left arduino response: OK 21 80
+2025-04-16 15:58:56,191 - INFO - >>Moving Upper_Lip (5) to 65 on arduino left.
+2025-04-16 15:58:56,214 - INFO - Left arduino response: OK 5 65
+2025-04-16 15:58:56,219 - INFO - Elapsed 13.38s, frame 627: Changed state to closed
+2025-04-16 15:58:56,413 - INFO - >>Moving Jaw (21) to 102 on arduino left.
+2025-04-16 15:58:56,451 - INFO - Left arduino response: OK 21 102
+2025-04-16 15:58:56,457 - INFO - >>Moving Upper_Lip (5) to 82 on arduino left.
+2025-04-16 15:58:56,480 - INFO - Left arduino response: OK 5 82
+2025-04-16 15:58:56,485 - INFO - Elapsed 13.63s, frame 639: Changed state to half
+2025-04-16 15:58:56,522 - INFO - >>Moving Jaw (21) to 80 on arduino left.
+2025-04-16 15:58:56,546 - INFO - Left arduino response: OK 21 80
+2025-04-16 15:58:56,552 - INFO - >>Moving Upper_Lip (5) to 65 on arduino left.
+2025-04-16 15:58:56,574 - INFO - Left arduino response: OK 5 65
+2025-04-16 15:58:56,580 - INFO - Elapsed 13.74s, frame 644: Changed state to closed
+2025-04-16 15:58:56,646 - INFO - Throttling: Too many commands for left Arduino. Sleeping for 0.37 seconds.
+2025-04-16 15:58:57,065 - INFO - >>Moving Jaw (21) to 102 on arduino left.
+2025-04-16 15:58:57,119 - INFO - Left arduino response: OK 21 102
+2025-04-16 15:58:57,126 - INFO - >>Moving Upper_Lip (5) to 82 on arduino left.
+2025-04-16 15:58:57,148 - INFO - Left arduino response: OK 5 82
+2025-04-16 15:58:57,154 - INFO - Elapsed 13.87s, frame 650: Changed state to half
+2025-04-16 15:58:57,165 - INFO - >>Moving Jaw (21) to 80 on arduino left.
+2025-04-16 15:58:57,189 - INFO - Left arduino response: OK 21 80
+2025-04-16 15:58:57,194 - INFO - >>Moving Upper_Lip (5) to 65 on arduino left.
+2025-04-16 15:58:57,217 - INFO - Left arduino response: OK 5 65
+2025-04-16 15:58:57,224 - INFO - Elapsed 14.39s, frame 674: Changed state to closed
+2025-04-16 15:58:57,671 - INFO - >>Moving Jaw (21) to 102 on arduino left.
+2025-04-16 15:58:57,701 - INFO - Left arduino response: OK 21 102
+2025-04-16 15:58:57,707 - INFO - >>Moving Upper_Lip (5) to 82 on arduino left.
+2025-04-16 15:58:57,730 - INFO - Left arduino response: OK 5 82
+2025-04-16 15:58:57,735 - INFO - Elapsed 14.89s, frame 698: Changed state to half
+2025-04-16 15:58:57,802 - INFO - >>Moving Jaw (21) to 80 on arduino left.
+2025-04-16 15:58:57,865 - INFO - Left arduino response: OK 21 80
+2025-04-16 15:58:57,871 - INFO - >>Moving Upper_Lip (5) to 65 on arduino left.
+2025-04-16 15:58:57,893 - INFO - Left arduino response: OK 5 65
+2025-04-16 15:58:57,900 - INFO - Elapsed 15.02s, frame 704: Changed state to closed
+2025-04-16 15:58:57,912 - INFO - >>Moving Jaw (21) to 102 on arduino left.
+2025-04-16 15:58:57,939 - INFO - Left arduino response: OK 21 102
+2025-04-16 15:58:57,944 - INFO - >>Moving Upper_Lip (5) to 82 on arduino left.
+2025-04-16 15:58:57,967 - INFO - Left arduino response: OK 5 82
+2025-04-16 15:58:57,974 - INFO - Elapsed 15.13s, frame 709: Changed state to half
+2025-04-16 15:58:57,985 - INFO - Throttling: Too many commands for left Arduino. Sleeping for 0.08 seconds.
+2025-04-16 15:58:58,071 - INFO - >>Moving Jaw (21) to 125 on arduino left.
+2025-04-16 15:58:58,119 - INFO - Left arduino response: OK 21 125
+2025-04-16 15:58:58,125 - INFO - >>Moving Upper_Lip (5) to 99 on arduino left.
+2025-04-16 15:58:58,147 - INFO - Left arduino response: OK 5 99
+2025-04-16 15:58:58,153 - INFO - Elapsed 15.21s, frame 712: Changed state to full
+2025-04-16 15:58:58,164 - INFO - >>Moving Jaw (21) to 80 on arduino left.
+2025-04-16 15:58:58,188 - INFO - Left arduino response: OK 21 80
+2025-04-16 15:58:58,194 - INFO - >>Moving Upper_Lip (5) to 65 on arduino left.
+2025-04-16 15:58:58,217 - INFO - Left arduino response: OK 5 65
+2025-04-16 15:58:58,223 - INFO - Elapsed 15.38s, frame 721: Changed state to closed
+2025-04-16 15:58:58,396 - INFO - >>Moving Jaw (21) to 102 on arduino left.
+2025-04-16 15:58:58,455 - INFO - Left arduino response: OK 21 102
+2025-04-16 15:58:58,461 - INFO - >>Moving Upper_Lip (5) to 82 on arduino left.
+2025-04-16 15:58:58,483 - INFO - Left arduino response: OK 5 82
+2025-04-16 15:58:58,490 - INFO - Elapsed 15.62s, frame 732: Changed state to half
+2025-04-16 15:58:58,547 - INFO - >>Moving Jaw (21) to 80 on arduino left.
+2025-04-16 15:58:58,623 - INFO - Left arduino response: OK 21 80
+2025-04-16 15:58:58,628 - INFO - >>Moving Upper_Lip (5) to 65 on arduino left.
+2025-04-16 15:58:58,651 - INFO - Left arduino response: OK 5 65
+2025-04-16 15:58:58,657 - INFO - Elapsed 15.77s, frame 739: Changed state to closed
+2025-04-16 15:58:58,673 - INFO - >>Moving Jaw (21) to 102 on arduino left.
+2025-04-16 15:58:58,700 - INFO - Left arduino response: OK 21 102
+2025-04-16 15:58:58,706 - INFO - >>Moving Upper_Lip (5) to 82 on arduino left.
+2025-04-16 15:58:58,729 - INFO - Left arduino response: OK 5 82
+2025-04-16 15:58:58,735 - INFO - Elapsed 15.89s, frame 745: Changed state to half
+2025-04-16 15:58:58,746 - INFO - Throttling: Too many commands for left Arduino. Sleeping for 0.33 seconds.
+2025-04-16 15:58:59,078 - INFO - >>Moving Jaw (21) to 125 on arduino left.
+2025-04-16 15:58:59,106 - INFO - Left arduino response: OK 21 125
+2025-04-16 15:58:59,114 - INFO - >>Moving Upper_Lip (5) to 99 on arduino left.
+2025-04-16 15:58:59,139 - INFO - Left arduino response: OK 5 99
+2025-04-16 15:58:59,145 - INFO - Elapsed 15.97s, frame 748: Changed state to full
+2025-04-16 15:58:59,156 - INFO - >>Moving Jaw (21) to 80 on arduino left.
+2025-04-16 15:58:59,180 - INFO - Left arduino response: OK 21 80
+2025-04-16 15:58:59,186 - INFO - >>Moving Upper_Lip (5) to 65 on arduino left.
+2025-04-16 15:58:59,209 - INFO - Left arduino response: OK 5 65
+2025-04-16 15:58:59,214 - INFO - Elapsed 16.38s, frame 767: Changed state to closed
+2025-04-16 15:58:59,231 - INFO - >>Moving Jaw (21) to 102 on arduino left.
+2025-04-16 15:58:59,258 - INFO - Left arduino response: OK 21 102
+2025-04-16 15:58:59,263 - INFO - >>Moving Upper_Lip (5) to 82 on arduino left.
+2025-04-16 15:58:59,286 - INFO - Left arduino response: OK 5 82
+2025-04-16 15:58:59,292 - INFO - Elapsed 16.45s, frame 771: Changed state to half
+2025-04-16 15:58:59,313 - INFO - >>Moving Jaw (21) to 80 on arduino left.
+2025-04-16 15:58:59,336 - INFO - Left arduino response: OK 21 80
+2025-04-16 15:58:59,341 - INFO - >>Moving Upper_Lip (5) to 65 on arduino left.
+2025-04-16 15:58:59,364 - INFO - Left arduino response: OK 5 65
+2025-04-16 15:58:59,370 - INFO - Elapsed 16.53s, frame 775: Changed state to closed
+2025-04-16 15:58:59,421 - INFO - >>Moving Jaw (21) to 102 on arduino left.
+2025-04-16 15:58:59,446 - INFO - Left arduino response: OK 21 102
+2025-04-16 15:58:59,452 - INFO - >>Moving Upper_Lip (5) to 82 on arduino left.
+2025-04-16 15:58:59,475 - INFO - Left arduino response: OK 5 82
+2025-04-16 15:58:59,480 - INFO - Elapsed 16.64s, frame 780: Changed state to half
+2025-04-16 15:58:59,552 - INFO - Throttling: Too many commands for left Arduino. Sleeping for 0.53 seconds.
+2025-04-16 15:59:00,118 - INFO - >>Moving Jaw (21) to 80 on arduino left.
+2025-04-16 15:59:00,143 - INFO - Left arduino response: OK 21 80
+2025-04-16 15:59:00,150 - INFO - >>Moving Upper_Lip (5) to 65 on arduino left.
+2025-04-16 15:59:00,175 - INFO - Left arduino response: OK 5 65
+2025-04-16 15:59:00,182 - INFO - Elapsed 16.77s, frame 786: Changed state to closed
+2025-04-16 15:59:00,254 - INFO - >>Moving Jaw (21) to 102 on arduino left.
+2025-04-16 15:59:00,315 - INFO - Left arduino response: OK 21 102
+2025-04-16 15:59:00,321 - INFO - >>Moving Upper_Lip (5) to 82 on arduino left.
+2025-04-16 15:59:00,343 - INFO - Left arduino response: OK 5 82
+2025-04-16 15:59:00,349 - INFO - Elapsed 17.47s, frame 819: Changed state to half
+2025-04-16 15:59:00,360 - INFO - >>Moving Jaw (21) to 80 on arduino left.
+2025-04-16 15:59:00,384 - INFO - Left arduino response: OK 21 80
+2025-04-16 15:59:00,391 - INFO - >>Moving Upper_Lip (5) to 65 on arduino left.
+2025-04-16 15:59:00,413 - INFO - Left arduino response: OK 5 65
+2025-04-16 15:59:00,419 - INFO - Elapsed 17.58s, frame 824: Changed state to closed
+2025-04-16 15:59:00,680 - INFO - >>Moving Jaw (21) to 102 on arduino left.
+2025-04-16 15:59:00,753 - INFO - Left arduino response: OK 21 102
+2025-04-16 15:59:00,760 - INFO - >>Moving Upper_Lip (5) to 82 on arduino left.
+2025-04-16 15:59:00,786 - INFO - Left arduino response: OK 5 82
+2025-04-16 15:59:00,792 - INFO - Elapsed 17.90s, frame 839: Changed state to half
+2025-04-16 15:59:00,803 - INFO - >>Moving Jaw (21) to 80 on arduino left.
+2025-04-16 15:59:00,827 - INFO - Left arduino response: OK 21 80
+2025-04-16 15:59:00,832 - INFO - >>Moving Upper_Lip (5) to 65 on arduino left.
+2025-04-16 15:59:00,855 - INFO - Left arduino response: OK 5 65
+2025-04-16 15:59:00,861 - INFO - Elapsed 18.02s, frame 844: Changed state to closed
+2025-04-16 15:59:01,235 - INFO - >>Moving Jaw (21) to 102 on arduino left.
+2025-04-16 15:59:01,298 - INFO - Left arduino response: OK 21 102
+2025-04-16 15:59:01,304 - INFO - >>Moving Upper_Lip (5) to 82 on arduino left.
+2025-04-16 15:59:01,326 - INFO - Left arduino response: OK 5 82
+2025-04-16 15:59:01,332 - INFO - Elapsed 18.46s, frame 865: Changed state to half
+2025-04-16 15:59:01,342 - INFO - >>Moving Jaw (21) to 80 on arduino left.
+2025-04-16 15:59:01,367 - INFO - Left arduino response: OK 21 80
+2025-04-16 15:59:01,373 - INFO - >>Moving Upper_Lip (5) to 65 on arduino left.
+2025-04-16 15:59:01,396 - INFO - Left arduino response: OK 5 65
+2025-04-16 15:59:01,402 - INFO - Elapsed 18.56s, frame 870: Changed state to closed
+2025-04-16 15:59:02,002 - INFO - >>Moving Jaw (21) to 102 on arduino left.
+2025-04-16 15:59:02,035 - INFO - Left arduino response: OK 21 102
+2025-04-16 15:59:02,042 - INFO - >>Moving Upper_Lip (5) to 82 on arduino left.
+2025-04-16 15:59:02,064 - INFO - Left arduino response: OK 5 82
+2025-04-16 15:59:02,070 - INFO - Elapsed 19.22s, frame 901: Changed state to half
+2025-04-16 15:59:02,087 - INFO - >>Moving Jaw (21) to 80 on arduino left.
+2025-04-16 15:59:02,113 - INFO - Left arduino response: OK 21 80
+2025-04-16 15:59:02,119 - INFO - >>Moving Upper_Lip (5) to 65 on arduino left.
+2025-04-16 15:59:02,142 - INFO - Left arduino response: OK 5 65
+2025-04-16 15:59:02,146 - INFO - Elapsed 19.31s, frame 905: Changed state to closed
+2025-04-16 15:59:02,158 - INFO - >>Moving Jaw (21) to 102 on arduino left.
+2025-04-16 15:59:02,183 - INFO - Left arduino response: OK 21 102
+2025-04-16 15:59:02,189 - INFO - >>Moving Upper_Lip (5) to 82 on arduino left.
+2025-04-16 15:59:02,211 - INFO - Left arduino response: OK 5 82
+2025-04-16 15:59:02,218 - INFO - Elapsed 19.38s, frame 908: Changed state to half
+2025-04-16 15:59:02,231 - INFO - Throttling: Too many commands for left Arduino. Sleeping for 0.00 seconds.
+2025-04-16 15:59:02,241 - INFO - >>Moving Jaw (21) to 80 on arduino left.
+2025-04-16 15:59:02,269 - INFO - Left arduino response: OK 21 80
+2025-04-16 15:59:02,275 - INFO - >>Moving Upper_Lip (5) to 65 on arduino left.
+2025-04-16 15:59:02,298 - INFO - Left arduino response: OK 5 65
+2025-04-16 15:59:02,304 - INFO - Elapsed 19.45s, frame 911: Changed state to closed
+2025-04-16 15:59:02,502 - INFO - >>Moving Jaw (21) to 80 on arduino left.
+2025-04-16 15:59:02,535 - INFO - Left arduino response: OK 21 80
+2025-04-16 15:59:02,541 - INFO - >>Moving Upper_Lip (5) to 65 on arduino left.
+2025-04-16 15:59:02,564 - INFO - Left arduino response: OK 5 65
+2025-04-16 15:59:02,570 - INFO - Audio finished, stopping mouth movement.
+2025-04-16 15:59:27,409 - INFO - Closing left hand.
+2025-04-16 15:59:27,415 - INFO - >>Moving ringfinger (24) to 10 on arduino left.
+2025-04-16 15:59:27,439 - INFO - Left arduino response: OK 24 10
+2025-04-16 15:59:27,445 - INFO - >>Moving midfinger (25) to 10 on arduino left.
+2025-04-16 15:59:27,468 - INFO - Left arduino response: OK 25 10
+2025-04-16 15:59:27,474 - INFO - >>Moving pinky (26) to 10 on arduino left.
+2025-04-16 15:59:27,500 - INFO - Left arduino response: OK 26 10
+2025-04-16 15:59:27,508 - INFO - >>Moving index (27) to 150 on arduino left.
+2025-04-16 15:59:27,537 - INFO - Left arduino response: OK 27 150
+2025-04-16 15:59:27,544 - INFO - >>Moving thumb (28) to 170 on arduino left.
+2025-04-16 15:59:27,574 - INFO - Left arduino response: OK 28 170
+2025-04-16 15:59:27,581 - INFO - Closing right hand.
+2025-04-16 15:59:27,587 - INFO - >>Moving ringfinger (6) to 160 on arduino right.
+2025-04-16 15:59:27,611 - INFO - Right arduino response: OK 6 160
+2025-04-16 15:59:27,618 - INFO - >>Moving midfinger (7) to 160 on arduino right.
+2025-04-16 15:59:27,644 - INFO - Right arduino response: OK 7 160
+2025-04-16 15:59:27,649 - INFO - >>Moving pinky (8) to 170 on arduino right.
+2025-04-16 15:59:27,673 - INFO - Right arduino response: OK 8 170
+2025-04-16 15:59:27,679 - INFO - >>Moving index (9) to 5 on arduino right.
+2025-04-16 15:59:27,701 - INFO - Right arduino response: OK 9 5
+2025-04-16 15:59:27,708 - INFO - >>Moving thumb (10) to 90 on arduino right.
+2025-04-16 15:59:27,734 - INFO - Right arduino response: OK 10 90
+2025-04-16 15:59:31,067 - INFO - >>Moving Eyelid_Right_Upper (9) to 35 on arduino left.
+2025-04-16 15:59:31,089 - INFO - Left arduino response: OK 9 35
+2025-04-16 15:59:31,097 - INFO - >>Moving Eyelid_Right_Lower (7) to 130 on arduino left.
+2025-04-16 15:59:31,122 - INFO - Left arduino response: OK 7 130
+2025-04-16 15:59:31,129 - INFO - >>Moving Eyelid_Left_Down (13) to 40 on arduino left.
+2025-04-16 15:59:31,155 - INFO - Left arduino response: OK 13 40
+2025-04-16 15:59:31,164 - INFO - >>Moving Eyelid_Left_Up (14) to 165 on arduino left.
+2025-04-16 15:59:31,192 - INFO - Left arduino response: OK 14 165
+2025-04-16 15:59:37,749 - INFO - >>Setting all servos to their rest positions!
+2025-04-16 15:59:37,876 - INFO - >>Moving Eye_Right_LR (1) to 108 on arduino left.
+2025-04-16 15:59:37,902 - INFO - Left arduino response: OK 1 108
+2025-04-16 15:59:38,009 - INFO - >>Moving Eye_Right_UD (2) to 112 on arduino left.
+2025-04-16 15:59:38,037 - INFO - Left arduino response: OK 2 112
+2025-04-16 15:59:38,145 - INFO - >>Moving Check_L (3) to 118 on arduino left.
+2025-04-16 15:59:38,172 - INFO - Left arduino response: OK 3 118
+2025-04-16 15:59:38,279 - INFO - >>Moving Check_R (4) to 101 on arduino left.
+2025-04-16 15:59:38,304 - INFO - Left arduino response: OK 4 101
+2025-04-16 15:59:38,411 - INFO - >>Moving Upper_Lip (5) to 67 on arduino left.
+2025-04-16 15:59:38,435 - INFO - Left arduino response: OK 5 67
+2025-04-16 15:59:38,542 - INFO - >>Moving Eye_Left_UD (6) to 90 on arduino left.
+2025-04-16 15:59:38,566 - INFO - Left arduino response: OK 6 90
+2025-04-16 15:59:38,673 - INFO - >>Moving Eyelid_Right_Lower (7) to 90 on arduino left.
+2025-04-16 15:59:38,697 - INFO - Left arduino response: OK 7 90
+2025-04-16 15:59:38,804 - INFO - >>Moving Eyebrow_R (8) to 115 on arduino left.
+2025-04-16 15:59:38,828 - INFO - Left arduino response: OK 8 115
+2025-04-16 15:59:38,935 - INFO - >>Moving Eyelid_Right_Upper (9) to 80 on arduino left.
+2025-04-16 15:59:38,959 - INFO - Left arduino response: OK 9 80
+2025-04-16 15:59:39,066 - INFO - >>Moving Forhead_R (10) to 90 on arduino left.
+2025-04-16 15:59:39,094 - INFO - Left arduino response: OK 10 90
+2025-04-16 15:59:39,201 - INFO - >>Moving Forhead_L (11) to 120 on arduino left.
+2025-04-16 15:59:39,229 - INFO - Left arduino response: OK 11 120
+2025-04-16 15:59:39,337 - INFO - >>Moving Eyebrow_L (12) to 96 on arduino left.
+2025-04-16 15:59:39,361 - INFO - Left arduino response: OK 12 96
+2025-04-16 15:59:39,467 - INFO - >>Moving Eyelid_Left_Down (13) to 90 on arduino left.
+2025-04-16 15:59:39,492 - INFO - Left arduino response: OK 13 90
+2025-04-16 15:59:39,599 - INFO - >>Moving Eyelid_Left_Up (14) to 72 on arduino left.
+2025-04-16 15:59:39,627 - INFO - Left arduino response: OK 14 72
+2025-04-16 15:59:39,734 - INFO - >>Moving Rothead (15) to 90 on arduino left.
+2025-04-16 15:59:39,762 - INFO - Left arduino response: OK 15 90
+2025-04-16 15:59:39,869 - INFO - >>Moving bicep (16) to 33 on arduino left.
+2025-04-16 15:59:39,893 - INFO - Left arduino response: OK 16 33
+2025-04-16 15:59:40,000 - INFO - >>Moving rotate (17) to 90 on arduino left.
+2025-04-16 15:59:40,024 - INFO - Left arduino response: OK 17 90
+2025-04-16 15:59:40,131 - INFO - >>Moving shoulder (18) to 145 on arduino left.
+2025-04-16 15:59:40,159 - INFO - Left arduino response: OK 18 145
+2025-04-16 15:59:40,267 - INFO - >>Moving omoplate (19) to 70 on arduino left.
+2025-04-16 15:59:40,295 - INFO - Left arduino response: OK 19 70
+2025-04-16 15:59:40,401 - INFO - >>Moving Neck (20) to 60 on arduino left.
+2025-04-16 15:59:40,426 - INFO - Left arduino response: OK 20 60
+2025-04-16 15:59:40,533 - INFO - >>Moving Jaw (21) to 80 on arduino left.
+2025-04-16 15:59:40,557 - INFO - Left arduino response: OK 21 80
+2025-04-16 15:59:40,663 - INFO - >>Moving Rollneck (22) to 70 on arduino left.
+2025-04-16 15:59:40,688 - INFO - Left arduino response: OK 22 70
+2025-04-16 15:59:40,795 - INFO - >>Moving wrist (23) to 90 on arduino left.
+2025-04-16 15:59:40,819 - INFO - Left arduino response: OK 23 90
+2025-04-16 15:59:40,926 - INFO - >>Moving ringfinger (24) to 170 on arduino left.
+2025-04-16 15:59:40,954 - INFO - Left arduino response: OK 24 170
+2025-04-16 15:59:41,061 - INFO - >>Moving midfinger (25) to 160 on arduino left.
+2025-04-16 15:59:41,089 - INFO - Left arduino response: OK 25 160
+2025-04-16 15:59:41,195 - INFO - >>Moving pinky (26) to 160 on arduino left.
+2025-04-16 15:59:41,221 - INFO - Left arduino response: OK 26 160
+2025-04-16 15:59:41,327 - INFO - >>Moving index (27) to 0 on arduino left.
+2025-04-16 15:59:41,352 - INFO - Left arduino response: OK 27 0
+2025-04-16 15:59:41,458 - INFO - >>Moving thumb (28) to 60 on arduino left.
+2025-04-16 15:59:41,483 - INFO - Left arduino response: OK 28 60
+2025-04-16 15:59:41,690 - INFO - >>Moving bicep (1) to 33 on arduino right.
+2025-04-16 15:59:41,713 - INFO - Right arduino response: OK 1 33
+2025-04-16 15:59:41,820 - INFO - >>Moving rotate (2) to 90 on arduino right.
+2025-04-16 15:59:41,844 - INFO - Right arduino response: OK 2 90
+2025-04-16 15:59:41,950 - INFO - >>Moving shoulder (3) to 72 on arduino right.
+2025-04-16 15:59:41,975 - INFO - Right arduino response: OK 3 72
+2025-04-16 15:59:42,081 - INFO - >>Moving omoplate (4) to 125 on arduino right.
+2025-04-16 15:59:42,106 - INFO - Right arduino response: OK 4 125
+2025-04-16 15:59:42,213 - INFO - >>Moving wrist (5) to 90 on arduino right.
+2025-04-16 15:59:42,233 - INFO - Right arduino response: OK 5 90
+2025-04-16 15:59:42,340 - INFO - >>Moving ringfinger (6) to 10 on arduino right.
+2025-04-16 15:59:42,364 - INFO - Right arduino response: OK 6 10
+2025-04-16 15:59:42,470 - INFO - >>Moving midfinger (7) to 10 on arduino right.
+2025-04-16 15:59:42,495 - INFO - Right arduino response: OK 7 10
+2025-04-16 15:59:42,602 - INFO - >>Moving pinky (8) to 25 on arduino right.
+2025-04-16 15:59:42,626 - INFO - Right arduino response: OK 8 25
+2025-04-16 15:59:42,734 - INFO - >>Moving index (9) to 160 on arduino right.
+2025-04-16 15:59:42,758 - INFO - Right arduino response: OK 9 160
+2025-04-16 15:59:42,864 - INFO - >>Moving thumb (10) to 170 on arduino right.
+2025-04-16 15:59:42,893 - INFO - Right arduino response: OK 10 170
+2025-04-16 15:59:58,018 - INFO - Connection has been successfully closed!
+2025-04-16 16:23:07,252 - INFO - Connection has been successfully initiated!
+2025-04-16 16:23:16,894 - INFO - Closing left hand.
+2025-04-16 16:23:16,903 - INFO - Closing right hand.
+2025-04-16 16:23:16,920 - INFO - left command for ringfinger sent with angle 10. Response: OK 24 10
+2025-04-16 16:23:16,930 - INFO - right command for ringfinger sent with angle 160. Response: OK 6 160
+2025-04-16 16:23:25,685 - INFO - Opening left hand.
+2025-04-16 16:23:25,726 - WARNING - left command for ringfinger did not receive an OK response.
+2025-04-16 16:23:25,735 - WARNING - right command for ringfinger did not receive an OK response.
+2025-04-16 16:23:25,742 - INFO - Opening right hand.
+2025-04-16 16:23:25,770 - INFO - left command for midfinger sent with angle 10. Response: OK 25 10
+2025-04-16 16:23:25,777 - INFO - right command for midfinger sent with angle 160. Response: OK 7 160
+2025-04-16 16:23:52,362 - WARNING - left command for midfinger did not receive an OK response.
+2025-04-16 16:23:52,369 - WARNING - right command for midfinger did not receive an OK response.
+2025-04-16 16:23:57,385 - INFO - >>Setting all servos to their rest positions!
+2025-04-16 16:23:57,407 - WARNING - Connection status: False
+2025-04-16 16:23:57,514 - WARNING - Connection status: False
+2025-04-16 16:23:57,624 - WARNING - Connection status: False
+2025-04-16 16:23:57,732 - WARNING - Connection status: False
+2025-04-16 16:23:57,841 - WARNING - Connection status: False
+2025-04-16 16:23:57,949 - WARNING - Connection status: False
+2025-04-16 16:23:58,058 - WARNING - Connection status: False
+2025-04-16 16:23:58,166 - WARNING - Connection status: False
+2025-04-16 16:23:58,272 - WARNING - Connection status: False
+2025-04-16 16:23:58,380 - WARNING - Connection status: False
+2025-04-16 16:23:58,486 - WARNING - Connection status: False
+2025-04-16 16:23:58,594 - WARNING - Connection status: False
+2025-04-16 16:23:58,702 - WARNING - Connection status: False
+2025-04-16 16:23:58,809 - WARNING - Connection status: False
+2025-04-16 16:23:58,916 - WARNING - Connection status: False
+2025-04-16 16:23:59,023 - WARNING - Connection status: False
+2025-04-16 16:23:59,130 - WARNING - Connection status: False
+2025-04-16 16:23:59,237 - WARNING - Connection status: False
+2025-04-16 16:23:59,344 - WARNING - Connection status: False
+2025-04-16 16:23:59,451 - WARNING - Connection status: False
+2025-04-16 16:23:59,561 - WARNING - Connection status: False
+2025-04-16 16:23:59,669 - WARNING - Connection status: False
+2025-04-16 16:23:59,777 - WARNING - Connection status: False
+2025-04-16 16:23:59,885 - WARNING - Connection status: False
+2025-04-16 16:23:59,992 - WARNING - Connection status: False
+2025-04-16 16:24:00,099 - WARNING - Connection status: False
+2025-04-16 16:24:00,208 - WARNING - Connection status: False
+2025-04-16 16:24:00,316 - WARNING - Connection status: False
+2025-04-16 16:24:00,423 - WARNING - Connection status: False
+2025-04-16 16:24:00,531 - WARNING - Connection status: False
+2025-04-16 16:24:00,638 - WARNING - Connection status: False
+2025-04-16 16:24:00,746 - WARNING - Connection status: False
+2025-04-16 16:24:00,854 - WARNING - Connection status: False
+2025-04-16 16:24:00,962 - WARNING - Connection status: False
+2025-04-16 16:24:01,069 - WARNING - Connection status: False
+2025-04-16 16:24:01,177 - WARNING - Connection status: False
+2025-04-16 16:24:01,285 - WARNING - Connection status: False
+2025-04-16 16:24:01,392 - WARNING - Connection status: False
+2025-04-16 16:24:01,500 - WARNING - Connection status: False
+2025-04-16 16:24:01,609 - WARNING - Connection status: False
+2025-04-16 16:24:16,735 - INFO - Connection has been successfully closed!
+2025-04-16 16:26:37,876 - INFO - Connection has been successfully initiated!
+2025-04-16 16:26:44,000 - INFO - Closing left hand.
+2025-04-16 16:26:44,011 - INFO - Closing right hand.
+2025-04-16 16:26:44,031 - INFO - left command for ringfinger sent with angle 10. Response: OK 24 10
+2025-04-16 16:26:44,039 - INFO - right command for ringfinger sent with angle 160. Response: OK 6 160
+2025-04-16 16:26:47,018 - WARNING - left command for ringfinger did not receive an OK response.
+2025-04-16 16:26:47,026 - WARNING - right command for ringfinger did not receive an OK response.
+2025-04-16 16:26:47,054 - INFO - left command for midfinger sent with angle 10. Response: OK 25 10
+2025-04-16 16:26:47,062 - INFO - right command for midfinger sent with angle 160. Response: OK 7 160
+2025-04-16 16:26:47,066 - WARNING - left command for midfinger did not receive an OK response.
+2025-04-16 16:26:47,074 - WARNING - right command for midfinger did not receive an OK response.
+2025-04-16 16:26:47,100 - INFO - left command for pinky sent with angle 10. Response: OK 26 10
+2025-04-16 16:26:47,107 - INFO - right command for pinky sent with angle 170. Response: OK 8 170
+2025-04-16 16:26:47,107 - WARNING - left command for pinky did not receive an OK response.
+2025-04-16 16:26:47,115 - WARNING - right command for pinky did not receive an OK response.
+2025-04-16 16:26:47,143 - INFO - right command for index sent with angle 5. Response: OK 9 5
+2025-04-16 16:26:47,145 - INFO - left command for index sent with angle 150. Response: OK 27 150
+2025-04-16 16:26:47,151 - WARNING - right command for index did not receive an OK response.
+2025-04-16 16:26:47,156 - WARNING - left command for index did not receive an OK response.
+2025-04-16 16:26:47,180 - INFO - right command for thumb sent with angle 90. Response: OK 10 90
+2025-04-16 16:26:47,186 - WARNING - right command for thumb did not receive an OK response.
+2025-04-16 16:26:47,190 - INFO - left command for thumb sent with angle 170. Response: OK 28 170
+2025-04-16 16:26:47,194 - WARNING - left command for thumb did not receive an OK response.
+2025-04-16 16:26:52,203 - INFO - >>Setting all servos to their rest positions!
+2025-04-16 16:27:11,249 - INFO - Connection has been successfully closed!
