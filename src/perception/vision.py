@@ -1,6 +1,7 @@
 import mediapipe as mp
 import collections
 import numpy as np
+import threading
 import logging
 import random
 import torch
@@ -48,8 +49,9 @@ class Akira_See:
         logging.basicConfig(level=logging.INFO)
 
         self.looking_at_person = True
-
-    def list_cameras(self, max_tested=5):
+        
+    @staticmethod
+    def list_cameras(max_tested=5):
         """
         Returns a list of indices for cameras that can be opened.
         By default, it checks camera indices 0 through 4.
@@ -88,7 +90,10 @@ class Akira_See:
         cap.release()
         cv2.destroyWindow(f"Camera {index}")
 
-    def try_both(self):
+    @staticmethod
+    def try_both():                
+        #cv2.namedWindow("Camera 0 and 1", cv2.WINDOW_NORMAL)
+        #cv2.resizeWindow("Camera 0 and 1", 640, 240)
         cap0 = cv2.VideoCapture(0)
         cap1 = cv2.VideoCapture(2)
 
@@ -117,7 +122,7 @@ class Akira_See:
                     print("Could not read frames from both cameras.")
                     break
 
-                if cv2.waitKey(1) & 0xFF == ord('q'):
+                if cv2.waitKey(30) & 0xFF == ord('q'):
                     break
 
         # Release everything when done
@@ -214,7 +219,7 @@ class Akira_See:
         print(f"Picture saved in: {file_path}")
         return file_path
 
-    def look_at_face(self, camera_index: int = 0, show_video: bool = False, exit_when_centered: bool = True) -> None:
+    def look_at_face_main(self, camera_index: int = 0, show_video: bool = False, exit_when_centered: bool = True) -> None:
         while self.looking_at_person:
             # Configuration parameters
             SLEEP_INTERVAL = 0.1
@@ -342,9 +347,282 @@ class Akira_See:
                     cap.release()
                     if show_video:
                         cv2.destroyAllWindows()
-
+            
             self.logger.info("Face tracking finished.")
             time.sleep(random.uniform(1, 3))
+
+    def look_at_face(self, camera_index: int = 0, show_video: bool = False, exit_when_centered: bool = True) -> None:
+        # Configuration parameters
+        SLEEP_INTERVAL = 0.05   # faster loop for smoother control
+        TOLERANCE_RATIO = 0.05  # tighter deadzone
+
+        # PID gains — you’ll need to tune these for your hardware!
+        Kp_yaw, Ki_yaw, Kd_yaw = 0.03, 0.0001, 0.005
+        Kp_pitch, Ki_pitch, Kd_pitch = 0.03, 0.0001, 0.005
+
+        # State for PID
+        integral_x = 0.0
+        integral_y = 0.0
+        prev_error_x = 0.0
+        prev_error_y = 0.0
+        last_time = time.time()
+
+        arduino = "left"
+        neck_name, _, rot_name = self.motion_controller.neck_servos
+        neck_index, neck_rest, neck_min, neck_max, neck_current = self.motion_controller.get_servo_positions(
+            servo_name=neck_name, arduino=arduino)
+        rot_index, rot_rest, rot_min, rot_max, rot_current = self.motion_controller.get_servo_positions(
+            servo_name=rot_name, arduino=arduino)
+
+        self.logger.info(f"Starting face tracking on camera index {camera_index}...")
+
+        cap = cv2.VideoCapture(camera_index)
+        if not cap.isOpened():
+            self.logger.error(f"Could not open camera {camera_index}.")
+            return
+
+        ret, frame = cap.read()
+        if not ret:
+            self.logger.error("Could not read initial frame from camera.")
+            cap.release()
+            return
+
+        h, w, _ = frame.shape
+        cx, cy = w // 2, h // 2
+        tol_x = int(w * TOLERANCE_RATIO)
+        tol_y = int(h * TOLERANCE_RATIO)
+
+        with self.mp_face_detection.FaceDetection(model_selection=0, min_detection_confidence=0.5) as face_detection:
+            try:
+                while True:
+                    now = time.time()
+                    dt = now - last_time
+                    last_time = now
+
+                    time.sleep(SLEEP_INTERVAL)
+                    ret, frame = cap.read()
+                    if not ret:
+                        self.logger.error("Failed to capture frame.")
+                        break
+
+                    frame = cv2.flip(frame, 1)
+                    rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                    results = face_detection.process(rgb)
+
+                    if results.detections:
+                        # get the first face
+                        bbox = results.detections[0].location_data.relative_bounding_box
+                        x = int((bbox.xmin + bbox.width / 2) * w)
+                        y = int((bbox.ymin + bbox.height / 2) * h)
+
+                        if show_video:
+                            cv2.rectangle(frame, (int(bbox.xmin*w), int(bbox.ymin*h)),
+                                          (int((bbox.xmin+bbox.width)*w), int((bbox.ymin+bbox.height)*h)),
+                                          (0,255,0), 2)
+                            cv2.circle(frame, (x,y), 5, (0,0,255), -1)
+
+                        # compute error
+                        error_x = cx - x
+                        error_y = cy - y
+
+                        # deadzone
+                        if abs(error_x) > tol_x or abs(error_y) > tol_y:
+                            # PID for yaw (rothead)
+                            integral_x += error_x * dt
+                            derivative_x = (error_x - prev_error_x) / dt if dt > 0 else 0.0
+                            command_x = (Kp_yaw * error_x +
+                                         Ki_yaw * integral_x +
+                                         Kd_yaw * derivative_x)
+
+                            # PID for pitch (neck)
+                            integral_y += error_y * dt
+                            derivative_y = (error_y - prev_error_y) / dt if dt > 0 else 0.0
+                            command_y = (Kp_pitch * error_y +
+                                         Ki_pitch * integral_y +
+                                         Kd_pitch * derivative_y)
+
+                            prev_error_x, prev_error_y = error_x, error_y
+
+                            # round and clamp to servo limits
+                            d_rot = int(np.clip(command_x, rot_min - rot_current, rot_max - rot_current))
+                            d_neck = int(np.clip(command_y, neck_min - neck_current, neck_max - neck_current))
+
+                            rot_current  += d_rot
+                            neck_current += d_neck
+
+                            self.logger.debug(f"PID dx={command_x:.2f}, dy={command_y:.2f} → Δrot={d_rot}, Δneck={d_neck}")
+
+                            # send commands
+                            try:
+                                self.motion_controller.set_current_pos_servo(rot_name, arduino, rot_current)
+                                self.motion_controller.set_current_pos_servo(neck_name, arduino, neck_current)
+                                self.motion_controller.send_command(rot_index, rot_current, arduino, rot_name)
+                                self.motion_controller.send_command(neck_index, neck_current, arduino, neck_name)
+                            except Exception as e:
+                                self.logger.error(f"Motion controller error: {e}")
+                        else:
+                            # centered within tolerance?
+                            if exit_when_centered:
+                                self.logger.info("Centered; exiting.")
+                                break
+
+                    # draw the deadzone
+                    if show_video:
+                        cv2.rectangle(frame,
+                                      (cx - tol_x, cy - tol_y),
+                                      (cx + tol_x, cy + tol_y),
+                                      (255,255,0), 1)
+                        cv2.circle(frame, (cx, cy), 5, (255,255,255), -1)
+                        cv2.imshow('Face Tracking', frame)
+                        if cv2.waitKey(5) & 0xFF == ord('q'):
+                            self.logger.info("'q' pressed, exiting.")
+                            break
+
+            finally:
+                self.logger.info("Cleaning up...")
+                cap.release()
+                if show_video:
+                    cv2.destroyAllWindows()
+
+        self.logger.info("Face tracking finished.")
+
+    def look_at_face_stereo(self,
+                        left_cam: int = 0,
+                        right_cam: int = 2,
+                        show_video: bool = False,
+                        exit_when_centered: bool = False) -> None:
+        print("Looking at face stereo!")
+        # PID gains (tune these!)
+        Kp, Ki, Kd = 0.03, 0.0001, 0.005
+        SLEEP = 0.05
+        TOLERANCE = 0.05  # as fraction of frame dims
+
+        # PID state
+        int_x = int_y = 0.0
+        prev_err_x = prev_err_y = 0.0
+        last = time.time()
+
+        # open both cameras
+        capL = cv2.VideoCapture(left_cam)
+        capR = cv2.VideoCapture(right_cam)
+        if not capL.isOpened() or not capR.isOpened():
+            self.logger.error("Cannot open both cameras.")
+            return
+
+        # grab one frame to get size
+        retL, frameL = capL.read()
+        retR, frameR = capR.read()
+        if not (retL and retR):
+            self.logger.error("Failed to read initial frames.")
+            return
+        h, w, _ = frameL.shape
+        cx, cy = w//2, h//2
+        tol_x = int(w * TOLERANCE)
+        tol_y = int(h * TOLERANCE)
+
+        # servo setup (same as before)…
+        arduino = "left"
+        neck_name, _, rot_name = self.motion_controller.neck_servos
+        neck_idx, neck_rest, neck_min, neck_max, neck_cur = \
+            self.motion_controller.get_servo_positions(neck_name, arduino)
+        rot_idx, rot_rest, rot_min, rot_max, rot_cur = \
+            self.motion_controller.get_servo_positions(rot_name, arduino)
+
+        with self.mp_face_detection.FaceDetection(model_selection=0,
+                                                  min_detection_confidence=0.5) as fd:
+            try:
+                while self.looking_at_person:
+                    now = time.time()
+                    dt = now - last
+                    last = now
+
+                    time.sleep(SLEEP)
+                    retL, fL = capL.read()
+                    retR, fR = capR.read()
+                    if not (retL and retR):
+                        break
+
+                    fL = cv2.flip(fL, 1)
+                    fR = cv2.flip(fR, 1)
+                    rgbL = cv2.cvtColor(fL, cv2.COLOR_BGR2RGB)
+                    rgbR = cv2.cvtColor(fR, cv2.COLOR_BGR2RGB)
+
+                    resL = fd.process(rgbL)
+                    resR = fd.process(rgbR)
+
+                    # only proceed if both see a face
+                    if not (resL.detections and resR.detections):
+                        continue
+
+                    def get_center(detection, frame):
+                        bbox = detection.location_data.relative_bounding_box
+                        x = int((bbox.xmin + bbox.width/2) * w)
+                        y = int((bbox.ymin + bbox.height/2) * h)
+                        return x, y
+
+                    xL, yL = get_center(resL.detections[0], fL)
+                    xR, yR = get_center(resR.detections[0], fR)
+
+                    # optionally draw
+                    if show_video:
+                        for (f, x,y, res) in [(fL,xL,yL,resL),(fR,xR,yR,resR)]:
+                            bb = res.detections[0].location_data.relative_bounding_box
+                            x0, y0 = int(bb.xmin*w), int(bb.ymin*h)
+                            x1, y1 = int((bb.xmin+bb.width)*w), int((bb.ymin+bb.height)*h)
+                            cv2.rectangle(f, (x0,y0), (x1,y1), (0,255,0),2)
+                            cv2.circle(f, (x,y), 4, (0,0,255), -1)
+                            cv2.imshow('L', fL)
+                            cv2.imshow('R', fR)
+
+                    # compute and average errors
+                    err_x = ((cx - xL) + (cx - xR)) / 2.0
+                    err_y = ((cy - yL) + (cy - yR)) / 2.0
+
+                    # only act if outside deadzone in *either* camera
+                    if abs(cx - xL) > tol_x or abs(cx - xR) > tol_x \
+                       or abs(cy - yL) > tol_y or abs(cy - yR) > tol_y:
+
+                        # PID
+                        int_x  += err_x * dt
+                        deriv_x = (err_x - prev_err_x) / dt if dt>0 else 0
+                        cmd_x   = Kp*err_x + Ki*int_x + Kd*deriv_x
+
+                        int_y  += err_y * dt
+                        deriv_y = (err_y - prev_err_y) / dt if dt>0 else 0
+                        cmd_y   = - (Kp*err_y + Ki*int_y + Kd*deriv_y)
+
+                        prev_err_x, prev_err_y = err_x, err_y
+
+                        # clamp and apply
+                        delta_rothead = int(np.clip(cmd_x, rot_min-rot_cur, rot_max-rot_cur))
+                        delta_neck   = int(np.clip(cmd_y, neck_min-neck_cur, neck_max-neck_cur))
+
+                        prev_rot_cur = rot_cur
+                        prev_neck_cur = neck_cur
+                        
+                        rot_cur  += delta_rothead
+                        neck_cur += delta_neck
+
+                        if rot_cur != prev_rot_cur:
+                            self.motion_controller.set_current_pos_servo(rot_name, arduino, rot_cur)
+                            self.motion_controller.send_command(rot_idx, rot_cur, arduino, rot_name)
+                        if neck_cur != prev_neck_cur:
+                            self.motion_controller.set_current_pos_servo(neck_name, arduino, neck_cur)
+                            self.motion_controller.send_command(neck_idx, neck_cur, arduino, neck_name)
+                    else:
+                        # both are centered
+                        if exit_when_centered:
+                            break
+
+                    if show_video and cv2.waitKey(1) & 0xFF == ord('q'):
+                        break
+
+            finally:
+                capL.release()
+                capR.release()
+                if show_video:
+                    cv2.destroyAllWindows()
+
 
     def start_looking_at(self):
         self.looking_at_person = True
@@ -356,8 +634,13 @@ class Akira_See:
 
 # --- Main execution block ---
 if __name__ == "__main__":
-    akira_vision = Akira_See()
-    akira_vision.look_at_face(camera_index=0, exit_when_centered=True)
+    
+    try:
+        akira_vision = Akira_See()
+        #akira_vision.look_at_face(camera_index=0, show_video=False, exit_when_centered=False)
+        akira_vision.look_at_face_stereo()
+    finally:
+        akira_vision.motion_controller.close_connection()
     
 ##    for _ in range(3):
 ##        print(akira_vision.describe_what_akira_sees(akira_vision.take_photo()))

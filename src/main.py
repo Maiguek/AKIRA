@@ -56,7 +56,7 @@ def stop_moving_arms_rand(mc, moving_arms_rand_thread):
 
 def start_looking_at(akira_vision):
     akira_vision.start_looking_at()
-    looking_at_thread = threading.Thread(target=akira_vision.look_at_face)
+    looking_at_thread = threading.Thread(target=akira_vision.look_at_face_stereo)
     looking_at_thread.start() 
     return looking_at_thread
 
@@ -94,7 +94,7 @@ def main():
             stop_moving_hands_rand(mc, moving_hands_rand_thread)
             stop_moving_arms_rand(mc, moving_arms_rand_thread)
             mc.arms_rest()
-            #looking_at_thread = start_looking_at(akira_vision)
+            looking_at_thread = start_looking_at(akira_vision)
             
             user_input = listener.recognize_speech()
             if user_input:
@@ -108,7 +108,7 @@ def main():
 
                 # Akira will appear to be thinking while we generate an answer
                 stop_blinking(mc, blinking_thread)
-                #stop_looking_at(akira_vision, looking_at_thread)
+                stop_looking_at(akira_vision, looking_at_thread)
                 music_player.play_music()
                 mc.akira_close_eyes()
                 mc.akira_close_hand(arduino="left")

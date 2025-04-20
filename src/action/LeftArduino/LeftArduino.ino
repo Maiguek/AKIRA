@@ -115,7 +115,7 @@ int omoplate_min = 10;
 int omoplate_max = 70;
 
 int Neck_min = 50;
-int Neck_max = 100;
+int Neck_max = 90;
 
 int Jaw_min = 80;
 int Jaw_max = 125;
