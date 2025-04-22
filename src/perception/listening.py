@@ -13,11 +13,18 @@ class Akira_Listen():
         if self.recognizer_method == "whisper":
             self.whisper_model = WhisperModel(whisper_model_size)
     
-    def list_microphones(self):
+    def list_microphones(self, verbose=False):
         """List all available microphones"""
-        print("Available Microphones:")
+        if verbose:
+            print("Available Microphones:")
+        mics = dict()
         for index, name in enumerate(sr.Microphone.list_microphone_names()):
-            print(f"{index}: {name}")
+            if verbose:
+                print(f"{index}: {name}")
+            mics[name] = int(index)
+
+        return mics
+            
 
     def set_mic_index(self, mic_index):
         self.mic_index = mic_index
@@ -80,12 +87,12 @@ if __name__ == "__main__":
         whisper_model_size="tiny"
         )
 
-    listener.list_microphones()
-    mic_index = int(input("Enter the index of your microphone: "))
-    #listener.test_microphone(mic_index)
-    
-    listener.set_mic_index(mic_index)
-
-    # Step 4: Run Speech Recognition
-    print("Now testing speech recognition...")
-    print(listener.recognize_speech())
+    print(listener.list_microphones())
+##    mic_index = int(input("Enter the index of your microphone: "))
+##    #listener.test_microphone(mic_index)
+##    
+##    listener.set_mic_index(mic_index)
+##
+##    # Step 4: Run Speech Recognition
+##    print("Now testing speech recognition...")
+##    print(listener.recognize_speech())

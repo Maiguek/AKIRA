@@ -65,13 +65,19 @@ def stop_looking_at(akira_vision, looking_at_thread):
     looking_at_thread.join()
     
 def main():
+    listener = Akira_Listen()
+    mics = listener.list_microphones()
+    mic_index = None
+    for mic_name, mic_idx in mics.items():
+        if "Composite" in mic_name:
+            mic_index = mic_idx
+
+    if mic_index is None:
+        return
+    listener.set_mic_index(mic_index)
+
     chat = Akira_Chat()
     chat.start_ollama()
-
-    listener = Akira_Listen()
-    listener.list_microphones()
-    mic_index = int(input("Enter the index of your microphone: "))
-    listener.set_mic_index(mic_index)
 
     akira_voice_file = "action/output.wav"
     voice = Akira_Talk(output_path = akira_voice_file, spec_path = "action/spec.png")
