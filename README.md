@@ -2,11 +2,11 @@
 
 _A project inspired by Hiroshi Ishiguro’s Symbiotic Human-Robot Interaction Project_
 
+![Akira Full Body] (./media/akira_full_body_0.png)
+
 ## Table of Contents
 - [Project Overview](#project-overview)
-- [Features](#features)
-- [Current development status](#current-development-status)
-- [Research Goals](#research-goals)
+- [Who is Akira?] (#who-is-akira)
 - [Photos] (#photos)
 - [Acknowledgments](#acknowledgements)
 
@@ -19,6 +19,7 @@ _Note: This project is also being documented in YouTube, please check it out: ht
 This project aims to create a robot capable of engaging in natural and expressive conversations to a certain extent, and will be tested against participants in order to do have interactions with them and analyze how these go. This research has a big focus on qualitative analysis.
 
 ## Who is Akira?
+
 Akira is a humanoid robot created using open source projects such as Inmoov Project (body), Llama 3.2 3B (language capabilities), F5-TTS (voice cloning), BLIP (image description), and Whisper from Open AI (speech recognition). 
 
 Akira runs on a Jetson Orin Nano Super from Nvidia. And runs everything locally.
@@ -35,19 +36,11 @@ _Note: Akira is far away of being perfect either by its physical structure or it
 
 ## Photos
 
-![Akira Winking](./media/IMG_4697.png)
+![Akira Winking](./media/akira_winking.png.png)
 
-![Akira's Front](./media/IMG_4715.png)
+![Akira's Early Developing Stage 1](./media/akira_stage1.png.png)
 
-![Akira's Back](./media/IMG_4716.png)
-
-![Power Distribution](./media/IMG_4717.png)
-
-![Face Servo Hub](./media/IMG_4718.png)
-
-![Akira Face](./media/IMG_4719.png)
-
-![Close Up Akira](./media/IMG_4720.png)
+![Akira's Early Developing Stage 1 - 1](.media/akira_stage1.1.png.png)
 
 ## Acknowledgments
 - My supervisors and colleagues from the AI Bachelor’s program for their ongoing support and feedback.
