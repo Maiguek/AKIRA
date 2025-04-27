@@ -1,0 +1,34 @@
+[
+  {
+    "servo": "shoulder_left",
+    "angle": 107
+  },
+  {
+    "servo": "omoplate_left",
+    "angle": 30
+  },
+  {
+    "servo": "rotate_left",
+    "angle": 66
+  },
+  {
+    "servo": "bicep_left",
+    "angle": 30
+  },
+  {
+    "servo": "shoulder_right",
+    "angle": 39
+  },
+  {
+    "servo": "omoplate_right",
+    "angle": 117
+  },
+  {
+    "servo": "rotate_right",
+    "angle": 43
+  },
+  {
+    "servo": "bicep_right",
+    "angle": 16
+  }
+]

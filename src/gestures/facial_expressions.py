@@ -2,3 +2,4 @@
 # I already have an emotion detection model.
 # I just want to use it on Akira, and with RL learn a policy to make the facial expressions.
 
+# TODO .... but not priority for now

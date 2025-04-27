@@ -31,8 +31,8 @@ logger.addHandler(ch)
 class MotionController:
     def __init__(
         self,
-        left_port='/dev/ttyACM0',
-        right_port='/dev/ttyACM1',
+        left_port="/dev/ttyACM0",
+        right_port="/dev/ttyACM1",
         baud_rate=9600,
         left_servos_file="servos_data_left.csv",
         right_servos_file="servos_data_right.csv",
