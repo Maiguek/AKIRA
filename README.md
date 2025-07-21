@@ -13,7 +13,7 @@
 
 > _This project is also being documented on YouTube. Follow along here: <https://www.youtube.com/@maiguek-516>_
 
-**Akira’s Journey** is the practical component of my Bachelor’s thesis exploring how people perceive “being human”. Akira, a humanoid robot, is built almost entirely from open‑source projects, including the **Inmoov** body (Gael Langevin), **Llama 3.2 3B** (language), **F5‑TTS** (voice), **Whisper** (speech‑to‑text), and **BLIP** (image captioning).
+**Akira’s Journey** is the practical component of my Bachelor’s thesis exploring how people perceive “being human”. Akira, a humanoid robot, is built almost entirely from open‑source projects, including the **Inmoov project** (body), **Llama 3.2 3B** (language), **F5‑TTS** (voice), **Whisper** (speech‑to‑text), and **BLIP** (image captioning).
 
 The goal was to create a robot that could participate in natural, casual conversations and to study those interactions qualitatively with volunteers.
 
