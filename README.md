@@ -11,7 +11,7 @@
 
 ## Project Overview
 
-> _This project is also being documented on YouTube. Follow along here: <https://www.youtube.com/@maiguek-516>_
+> _This project is documented on YouTube. Follow along here: <https://www.youtube.com/@maiguek-516>_
 
 **Akira’s Journey** is the practical component of my Bachelor’s thesis exploring how people perceive “being human”. Akira, a humanoid robot, is built almost entirely from open‑source projects, including the **Inmoov project** (body), **Llama 3.2 3B** (language), **F5‑TTS** (voice), **Whisper** (speech‑to‑text), and **BLIP** (image captioning).
 
@@ -30,8 +30,6 @@ The goal was to create a robot that could participate in natural, casual convers
   * 2 × 5 V 8 Ω speakers
   * 10‑port RSHTECH USB 3.2 hub
   * 2 × 4 K 12 MP cameras (OV5693 / IMX258)
-
-> _Akira is still a work in progress, both physically and conversationally, and that imperfection is exactly what makes it such an interesting research subject!_
 
 ## Photos
 
